@@ -1,0 +1,257 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1320" viewBox="0 0 1900 1320">
+  <defs>
+    <style>
+      .title { font: 700 34px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#101828; }
+      .subtitle { font: 400 17px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#475467; }
+      .section { font: 700 20px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#344054; }
+      .box-title { font: 700 20px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#101828; }
+      .box-text { font: 400 15px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#344054; }
+      .small { font: 400 13px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#475467; }
+      .net { font: 700 14px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#101828; }
+      .current { font: 700 14px "Microsoft YaHei","Noto Sans CJK SC",sans-serif; }
+      .formula { font: 600 15px Consolas,"Microsoft YaHei",monospace; fill:#42307d; }
+      .box { fill:#ffffff; stroke:#d0d5dd; stroke-width:2; rx:16; }
+      .power-box { fill:#fff7ed; stroke:#f79009; stroke-width:2.5; rx:16; }
+      .analog-box { fill:#ecfdf3; stroke:#12b76a; stroke-width:2.5; rx:16; }
+      .sensor-box { fill:#f4f3ff; stroke:#7a5af8; stroke-width:2.5; rx:16; }
+      .digital-box { fill:#eff8ff; stroke:#2e90fa; stroke-width:2.5; rx:16; }
+      .note-box { fill:#f9fafb; stroke:#98a2b3; stroke-width:1.5; rx:12; }
+      .power { fill:none; stroke:#f79009; stroke-width:5; marker-end:url(#arrow-power); }
+      .charge { fill:none; stroke:#d92d20; stroke-width:5; marker-end:url(#arrow-charge); }
+      .analog { fill:none; stroke:#12b76a; stroke-width:4; marker-end:url(#arrow-analog); }
+      .sensor { fill:none; stroke:#7a5af8; stroke-width:5; marker-end:url(#arrow-sensor); }
+      .sense { fill:none; stroke:#2e90fa; stroke-width:3; stroke-dasharray:10 8; marker-end:url(#arrow-sense); }
+      .off { fill:none; stroke:#667085; stroke-width:3; stroke-dasharray:8 7; marker-end:url(#arrow-off); }
+      .ground { fill:none; stroke:#344054; stroke-width:4; }
+      .thin-ground { fill:none; stroke:#667085; stroke-width:2.5; marker-end:url(#arrow-ground); }
+    </style>
+    <marker id="arrow-power" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#f79009"/>
+    </marker>
+    <marker id="arrow-charge" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#d92d20"/>
+    </marker>
+    <marker id="arrow-analog" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#12b76a"/>
+    </marker>
+    <marker id="arrow-sensor" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#7a5af8"/>
+    </marker>
+    <marker id="arrow-sense" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2e90fa"/>
+    </marker>
+    <marker id="arrow-off" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/>
+    </marker>
+    <marker id="arrow-ground" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#667085"/>
+    </marker>
+  </defs>
+
+  <rect width="1900" height="1320" fill="#f8fafc"/>
+  <text x="55" y="58" class="title">便携式气体传感检测板｜硬件整体结构与关键电流方向</text>
+  <text x="55" y="91" class="subtitle">常规电流方向按正电荷流向表示；主测量范围0.2–1.6 µA，过量程观察至20 µA，25 µA保护关断</text>
+
+  <!-- Legend -->
+  <rect x="1250" y="28" width="595" height="78" class="note-box"/>
+  <line x1="1275" y1="52" x2="1325" y2="52" class="charge"/><text x="1338" y="57" class="small">USB充电</text>
+  <line x1="1440" y1="52" x2="1490" y2="52" class="power"/><text x="1503" y="57" class="small">主电源</text>
+  <line x1="1590" y1="52" x2="1640" y2="52" class="analog"/><text x="1653" y="57" class="small">模拟支路</text>
+  <line x1="1275" y1="82" x2="1325" y2="82" class="sensor"/><text x="1338" y="87" class="small">传感器电流</text>
+  <line x1="1475" y1="82" x2="1525" y2="82" class="sense"/><text x="1538" y="87" class="small">ADC/状态采样</text>
+
+  <!-- Top section -->
+  <text x="55" y="145" class="section">① 充电、电池与3.0 V主电源</text>
+
+  <rect x="55" y="170" width="250" height="170" class="power-box"/>
+  <text x="180" y="202" text-anchor="middle" class="box-title">J1 USB-C</text>
+  <text x="78" y="235" class="box-text">VBUS：5 V</text>
+  <text x="78" y="263" class="box-text">CC1、CC2：各5.1 kΩ → GND</text>
+  <text x="78" y="291" class="box-text">仅供电，不接USB数据线</text>
+  <text x="78" y="319" class="small">VBUS分压静态电流 ≈ 2.5 µA</text>
+
+  <rect x="405" y="170" width="250" height="170" class="power-box"/>
+  <text x="530" y="202" text-anchor="middle" class="box-title">U1 TP4054</text>
+  <text x="428" y="235" class="box-text">单节LiPo线性充电</text>
+  <text x="428" y="263" class="box-text">RPROG = 10 kΩ</text>
+  <text x="428" y="291" class="box-text">CHRG：开漏状态输出</text>
+  <text x="428" y="319" class="small">CHG_STAT_N低时上拉电流≈30 µA</text>
+
+  <rect x="755" y="170" width="250" height="170" class="power-box"/>
+  <text x="880" y="202" text-anchor="middle" class="box-title">J2 保护型LiPo</text>
+  <text x="778" y="235" class="box-text">BAT：3.0–4.2 V</text>
+  <text x="778" y="263" class="box-text">建议容量 ≥ 100 mAh</text>
+  <text x="778" y="291" class="box-text">充电与系统负载共用BAT节点</text>
+  <text x="778" y="319" class="small">BAT分压静态电流≈1.5–2.1 µA</text>
+
+  <rect x="1105" y="170" width="250" height="170" class="power-box"/>
+  <text x="1230" y="202" text-anchor="middle" class="box-title">U2 ME6211C30</text>
+  <text x="1128" y="235" class="box-text">3.0 V低噪声LDO</text>
+  <text x="1128" y="263" class="box-text">CE直接接BAT：主电源常开</text>
+  <text x="1128" y="291" class="box-text">输出：3V0</text>
+  <text x="1128" y="319" class="small">LDO静态电流典型约30 µA</text>
+
+  <rect x="1465" y="145" width="380" height="250" class="digital-box"/>
+  <text x="1655" y="180" text-anchor="middle" class="box-title">U7 STM32G030 + U8 VG6328A-Pro</text>
+  <text x="1655" y="205" text-anchor="middle" class="small">STM32：主控/12位ADC；UART连接独立BLE模块</text>
+  <text x="1490" y="240" class="box-text">3V0 → STM32；FB1 → BLE_3V0</text>
+  <text x="1490" y="268" class="box-text">BLE模块工作电流典型约5 mA</text>
+  <text x="1490" y="296" class="box-text">低功耗广播参考约150 µA（1 s间隔）</text>
+  <text x="1490" y="324" class="box-text">ANA_EN控制模拟前端上电</text>
+  <text x="1490" y="352" class="box-text">SWDIO / SWDCLK / RESET_N烧录</text>
+  <text x="1490" y="378" class="small">BLE上传：电流、阻值、偏置、电池、充电状态</text>
+
+  <!-- Top arrows -->
+  <path d="M305 235 H405" class="charge"/>
+  <text x="355" y="218" text-anchor="middle" class="current" fill="#d92d20">IUSB</text>
+  <path d="M655 235 H755" class="charge"/>
+  <text x="705" y="211" text-anchor="middle" class="current" fill="#d92d20">ICHG ≈ 100 mA</text>
+  <text x="705" y="230" text-anchor="middle" class="small">实际入电池≈100 mA−ISYS</text>
+  <path d="M1005 255 H1105" class="power"/>
+  <text x="1055" y="238" text-anchor="middle" class="current" fill="#f79009">ISYS</text>
+  <path d="M1355 255 H1465" class="power"/>
+  <text x="1410" y="238" text-anchor="middle" class="current" fill="#f79009">I3V0→STM32 / BLE</text>
+
+  <!-- Sense paths top -->
+  <path d="M180 340 V405 H1510 V325" class="sense"/>
+  <text x="350" y="397" class="current" fill="#2e90fa">VBUS_SENSE：1 MΩ / 1 MΩ，2.5 µA</text>
+  <path d="M880 340 V430 H1540 V325" class="sense"/>
+  <text x="990" y="423" class="current" fill="#2e90fa">BAT_SENSE：1 MΩ / 1 MΩ，1.5–2.1 µA</text>
+  <path d="M530 340 V455 H1570 V325" class="sense"/>
+  <text x="650" y="448" class="current" fill="#2e90fa">CHG_STAT_N</text>
+
+  <!-- Analog power -->
+  <text x="55" y="515" class="section">② 可关断模拟电源与静态电流分配</text>
+  <rect x="1060" y="535" width="260" height="145" class="analog-box"/>
+  <text x="1190" y="568" text-anchor="middle" class="box-title">U3 TPS22919</text>
+  <text x="1083" y="600" class="box-text">IN = 3V0，ON = ANA_EN</text>
+  <text x="1083" y="628" class="box-text">VOUT = 3VA_SW</text>
+  <text x="1083" y="656" class="small">受控上电；关断漏电很低</text>
+
+  <rect x="1390" y="535" width="310" height="145" class="analog-box"/>
+  <text x="1545" y="568" text-anchor="middle" class="box-title">R6 + C5/C6 模拟电源滤波</text>
+  <text x="1413" y="600" class="box-text">3VA_SW ─ 22 Ω ─ 3VA</text>
+  <text x="1413" y="628" class="box-text">3VA ≈ 2.99 V</text>
+  <text x="1413" y="656" class="small">测量状态总模拟电流约0.30 mA</text>
+
+  <path d="M1465 352 H1420 V500 H1060 V585" class="power"/>
+  <text x="1260" y="493" text-anchor="middle" class="current" fill="#f79009">3V0 → IANA ≈ 0.30 mA（ANA_EN=1）</text>
+  <path d="M1320 607 H1390" class="analog"/>
+  <text x="1355" y="590" text-anchor="middle" class="net">3VA_SW</text>
+
+  <!-- QOD discharge -->
+  <path d="M1190 680 V740 H1115 V1195" class="off"/>
+  <text x="960" y="730" class="current" fill="#667085">关断：3VA电容 → R5 1 kΩ → QOD内部约24 Ω → GND</text>
+  <text x="960" y="751" class="small">初始放电电流约2.9 mA，随后指数衰减</text>
+
+  <!-- Analog branches -->
+  <rect x="55" y="565" width="290" height="215" class="analog-box"/>
+  <text x="200" y="598" text-anchor="middle" class="box-title">U4 LM4040A25 基准</text>
+  <text x="78" y="632" class="box-text">3VA → R12 3.9 kΩ → VREF</text>
+  <text x="78" y="660" class="box-text">VREF_2V5_RAW ≈ 2.500 V</text>
+  <text x="78" y="688" class="box-text">IR12 ≈ 126 µA</text>
+  <text x="78" y="716" class="box-text">分压支路 IDIV ≈ 20 µA</text>
+  <text x="78" y="744" class="small">LM4040实际阴极电流约106 µA ＞ 80 µA</text>
+
+  <rect x="420" y="565" width="300" height="215" class="analog-box"/>
+  <text x="570" y="598" text-anchor="middle" class="box-title">U5-A VCM缓冲</text>
+  <text x="443" y="632" class="box-text">输入：VREF_2V5_RAW</text>
+  <text x="443" y="660" class="box-text">输出：VCM ≈ 2.500 V</text>
+  <text x="443" y="688" class="box-text">用途：TIA +端、ADC、护环</text>
+  <text x="443" y="716" class="small">外部直流负载接近0，仅输入偏置/ADC采样</text>
+  <text x="443" y="744" class="small">TLV9002两通道总静态电流典型≈120 µA</text>
+
+  <rect x="420" y="820" width="300" height="245" class="analog-box"/>
+  <text x="570" y="853" text-anchor="middle" class="box-title">R14/R15 + U5-B VFORCE</text>
+  <text x="443" y="887" class="box-text">2.5 V → 100 kΩ / 24.9 kΩ</text>
+  <text x="443" y="915" class="box-text">分压点≈0.4984 V，IDIV≈20 µA</text>
+  <text x="443" y="943" class="box-text">U5-B缓冲后经R16 47 Ω</text>
+  <text x="443" y="971" class="box-text">VFORCE≈0.498 V</text>
+  <text x="443" y="999" class="small">传感器电流从VFORCE端进入缓冲器输出级</text>
+  <text x="443" y="1027" class="small">固件读取VCM−VFORCE获得实际偏置</text>
+
+  <rect x="785" y="565" width="310" height="215" class="analog-box"/>
+  <text x="940" y="598" text-anchor="middle" class="box-title">U6 OPA391 TIA</text>
+  <text x="808" y="632" class="box-text">+IN = VCM，−IN = SENS_H</text>
+  <text x="808" y="660" class="box-text">RF = 12 kΩ，CF = 47 nF</text>
+  <text x="808" y="688" class="box-text">静态电流典型≈24 µA</text>
+  <text x="808" y="716" class="box-text">TIA_OUT：主范围2.5024–2.5192 V</text>
+  <text x="808" y="744" class="formula">VOUT = VCM + IS × 12 kΩ</text>
+
+  <!-- 3VA distribution bus -->
+  <path d="M1700 607 H1760 V535 H200 V565" class="analog"/>
+  <text x="1735" y="590" class="net">3VA</text>
+  <path d="M200 535 V565" class="analog"/>
+  <path d="M570 535 V565" class="analog"/>
+  <path d="M940 535 V565" class="analog"/>
+  <text x="680" y="526" class="current" fill="#12b76a">3VA向基准、双运放和TIA供电；各支路最终回到GND</text>
+
+  <!-- Reference signal flow -->
+  <path d="M345 650 H420" class="analog"/>
+  <text x="382" y="635" text-anchor="middle" class="net">2.5 V</text>
+  <path d="M345 700 H380 V900 H420" class="analog"/>
+  <text x="365" y="815" text-anchor="middle" class="small" transform="rotate(-90 365 815)">2.5 V送入精密分压</text>
+
+  <!-- Sensor / TIA loop -->
+  <rect x="785" y="850" width="310" height="215" class="sensor-box"/>
+  <text x="940" y="883" text-anchor="middle" class="box-title">RS1 阻性气体传感器</text>
+  <text x="808" y="917" class="box-text">上端：SENS_H ≈ VCM ≈ 2.5 V</text>
+  <text x="808" y="945" class="box-text">下端：VFORCE ≈ 0.498 V</text>
+  <text x="808" y="973" class="box-text">偏置：约2.0016 V</text>
+  <text x="808" y="1001" class="formula">IS = (VCM−VFORCE) / RS</text>
+  <text x="808" y="1029" class="box-text">主范围IS = 0.2–1.6 µA</text>
+  <text x="808" y="1053" class="small">对应RS约10 MΩ–1.25 MΩ；25 µA约80 kΩ</text>
+
+  <!-- VCM to TIA + -->
+  <path d="M720 665 H785" class="sense"/>
+  <text x="752" y="648" text-anchor="middle" class="net">VCM</text>
+
+  <!-- TIA feedback loop and sensor current -->
+  <path d="M1095 690 H1175 V815 H1050 V850" class="sensor"/>
+  <text x="1188" y="752" class="current" fill="#7a5af8">OPA391输出供给传感器电流</text>
+  <text x="1188" y="775" class="small">TIA_OUT → RF/CF → SENS_H</text>
+  <path d="M940 850 V820 H835 V780" class="sensor"/>
+  <text x="775" y="816" class="current" fill="#7a5af8">反馈回到−IN</text>
+  <path d="M785 958 H720" class="sensor"/>
+  <text x="752" y="941" text-anchor="middle" class="net">IS</text>
+  <path d="M785 1015 H720" class="sensor"/>
+  <text x="752" y="1042" text-anchor="middle" class="current" fill="#7a5af8">0.2–25 µA → U5-B吸收</text>
+
+  <!-- ADC interface -->
+  <rect x="1215" y="815" width="310" height="260" class="digital-box"/>
+  <text x="1370" y="848" text-anchor="middle" class="box-title">STM32 ADC输入滤波与软件差分</text>
+  <text x="1238" y="882" class="box-text">TIA_OUT → R18 1 kΩ → PA0</text>
+  <text x="1238" y="910" class="box-text">VCM → R19 1 kΩ → PA1</text>
+  <text x="1238" y="938" class="box-text">VFORCE → R20 1 kΩ → PA4</text>
+  <text x="1238" y="966" class="box-text">C18/C19/C23：各10 nF到GND</text>
+  <text x="1238" y="1000" class="formula">IS = (TIA_OUT−VCM) / 12 kΩ</text>
+  <text x="1238" y="1028" class="formula">RS = (VCM−VFORCE) / IS</text>
+  <text x="1238" y="1056" class="small">ADC采样电流为瞬态小电流；1 kΩ用于隔离与限流</text>
+
+  <path d="M1095 635 H1150 V875 H1215" class="sense"/>
+  <text x="1125" y="855" class="small">TIA_OUT</text>
+  <path d="M720 675 H1140 V905 H1215" class="sense"/>
+  <text x="1150" y="898" class="small">VCM</text>
+  <path d="M720 970 H1160 V935 H1215" class="sense"/>
+  <text x="1168" y="960" class="small">VFORCE</text>
+  <path d="M1525 930 H1655 V395" class="sense"/>
+  <text x="1560" y="914" class="current" fill="#2e90fa">PA0/PA1/PA4 → ADC扫描</text>
+  <path d="M1845 155 H1880" class="sense"/>
+  <text x="1810" y="128" text-anchor="end" class="current" fill="#2e90fa">BLE无线发送 → 手机/上位机</text>
+
+  <!-- Ground bus -->
+  <line x1="55" y1="1200" x2="1845" y2="1200" class="ground"/>
+  <text x="950" y="1235" text-anchor="middle" class="section">GND / 电池负端：所有供电、基准、运放静态电流与传感器电流的最终回流节点</text>
+  <path d="M180 340 V1200" class="thin-ground"/>
+  <path d="M530 340 V1200" class="thin-ground"/>
+  <path d="M880 340 V1200" class="thin-ground"/>
+  <path d="M1230 340 V1200" class="thin-ground"/>
+  <path d="M1655 395 V1200" class="thin-ground"/>
+  <path d="M200 780 V1200" class="thin-ground"/>
+  <path d="M570 1065 V1200" class="thin-ground"/>
+  <path d="M940 1065 V1200" class="thin-ground"/>
+
+  <!-- Bottom notes -->
+  <rect x="55" y="1260" width="1790" height="42" class="note-box"/>
+  <text x="75" y="1287" class="small">实现顺序：USB充电与BAT建立 → LDO产生3V0 → STM32拉高ANA_EN → TPS22919建立3VA → VCM/VFORCE稳定 → TIA建立传感器电流回路 → STM32 ADC扫描并软件差分 → UART送入BLE上传。</text>
+</svg>

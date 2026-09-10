@@ -1,0 +1,38 @@
+# Windows / editor state
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+.codex_tmp/
+
+# Local EasyEDA bridge state and logs
+.easyeda-bridge/
+.easyeda-bridge*.log
+
+# Keil / ARM build output (keep project files and source)
+**/MDK-ARM/*/*.o
+**/MDK-ARM/*/*.d
+**/MDK-ARM/*/*.crf
+**/MDK-ARM/*/*.lst
+**/MDK-ARM/*/*.axf
+**/MDK-ARM/*/*.hex
+**/MDK-ARM/*/*.map
+**/MDK-ARM/*/*.lnp
+**/MDK-ARM/*/*.htm
+**/MDK-ARM/*/*.dep
+**/MDK-ARM/*/Objects/
+**/MDK-ARM/*/Listings/
+**/MDK-ARM/*/RTE/
+**/*.uvoptx
+**/*.uvguix*
+
+# IDE/debug logs and generated reports
+**/build*.log
+**/preflash*.log
+**/flash*.log
+**/rebuild*.log
+
+# Python / Node caches
+__pycache__/
+node_modules/
+npm-debug.log*

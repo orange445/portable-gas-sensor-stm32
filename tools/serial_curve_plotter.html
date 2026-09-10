@@ -1,0 +1,5073 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>便携式传感测试工作台</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --line: #d8dde6;
+      --green: #16803a;
+      --blue: #2563eb;
+      --red: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100vh;
+      min-height: 0;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(190px, .55fr) minmax(640px, 2fr) minmax(290px, .8fr);
+      align-items: stretch;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      font-size: 18px;
+      margin: 0;
+      font-weight: 650;
+      align-self: center;
+      white-space: nowrap;
+    }
+
+    .brand-heading {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 190px;
+      padding: 2px 4px;
+    }
+
+    .brand-heading small {
+      margin: 5px 0 0 30px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input, select, button {
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+      padding: 0 10px;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 0 10px;
+      text-decoration: none;
+    }
+
+    .button-link.driver {
+      color: #0f766e;
+    }
+
+    button.primary {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+
+    button.danger {
+      color: var(--red);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfe;
+    }
+
+    .toolbar-group input {
+      width: 86px;
+    }
+
+    .toolbar-group.scan {
+      justify-content: center;
+    }
+
+    .toolbar-group.data {
+      justify-content: flex-end;
+    }
+
+    .toolbar-stack {
+      display: grid;
+      gap: 8px;
+      align-content: center;
+    }
+
+    .toolbar-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      padding-right: 2px;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .mode-switch button {
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+    }
+
+    .mode-switch button.active {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    #startScan {
+      min-width: 96px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 12px;
+      padding: 12px;
+      min-height: 0;
+    }
+
+    .plot-wrap, aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 0;
+    }
+
+    .plot-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    aside {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stat {
+      padding: 6px 8px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .stat strong {
+      font-size: 15px;
+    }
+
+    .tools {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tools label {
+      justify-content: space-between;
+    }
+
+    .tools input {
+      width: 110px;
+    }
+
+    .tools input[type="checkbox"] {
+      width: auto;
+      height: auto;
+    }
+
+    .measurement-tools,
+    .display-options > div {
+      display: grid;
+      gap: 8px;
+    }
+
+    .display-options {
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }
+
+    .display-options summary {
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .display-options[open] > div {
+      padding-top: 8px;
+    }
+
+    .curve-list {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 12px;
+      min-height: 0;
+    }
+
+    .curve-list select {
+      width: 100%;
+      height: 100%;
+      min-height: 180px;
+    }
+
+    .history-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .history-state {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .curve-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .gm-curve-toggle {
+      width: 100%;
+      margin-top: 8px;
+      color: #147c78;
+      border-color: #9bd5d2;
+      background: #f0fbfa;
+    }
+
+    .gm-curve-toggle.active {
+      color: #fff;
+      border-color: #168f91;
+      background: #168f91;
+      box-shadow: 0 7px 18px rgba(22,143,145,.18);
+    }
+
+    .log {
+      padding: 10px;
+      margin: 0;
+      overflow: auto;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: #374151;
+      background: #fbfcfe;
+    }
+
+    .log[hidden] { display: none; }
+
+    .dft-view {
+      display: none;
+      grid-template-rows: auto auto 1fr;
+      gap: 12px;
+      min-height: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .app.analysis main {
+      grid-template-columns: 1fr;
+    }
+
+    .app.analysis .plot-wrap,
+    .app.analysis aside {
+      display: none;
+    }
+
+    .app.analysis .dft-view {
+      display: grid;
+    }
+
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .analysis-note {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    .dft-canvas-wrap {
+      min-height: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    #dftCanvas {
+      height: 100%;
+      min-height: 420px;
+    }
+
+    footer {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 8px 16px;
+      background: var(--panel);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9ca3af;
+      display: inline-block;
+    }
+
+    .dot.on { background: var(--green); }
+
+    /* 2026 instrument-workbench refresh */
+    :root {
+      --bg: #eef2f6;
+      --panel: rgba(255,255,255,.94);
+      --text: #152033;
+      --muted: #64748b;
+      --line: #d9e1ea;
+      --blue: #2563eb;
+      --navy: #0f1f38;
+      --cyan: #10b7c9;
+      --shadow: 0 12px 35px rgba(30, 50, 80, .08);
+    }
+    body { background: radial-gradient(circle at 20% 0%, #f8fbff 0, var(--bg) 38%); }
+    header { padding: 14px 18px; box-shadow: 0 1px 0 rgba(15,31,56,.04); z-index: 3; }
+    h1 { color: var(--navy); font-size: 20px; letter-spacing: -.02em; }
+    h1::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 10px; border-radius: 3px; background: linear-gradient(135deg,var(--cyan),var(--blue)); box-shadow: 0 0 0 5px #e7f8fa; }
+    .toolbar-group { border-color: #e1e7ef; background: #f8fafc; border-radius: 10px; }
+    .toolbar-group.scan { align-content: center; }
+    .toolbar-group.scan > .toolbar-group { background: #fff; border-color: #e5eaf1; }
+    input, select, button, .button-link { border-radius: 8px; }
+    button.primary { box-shadow: 0 6px 14px rgba(37,99,235,.2); }
+    main { gap: 14px; padding: 14px; }
+    .plot-wrap, aside, .dft-view { border-radius: 14px; box-shadow: var(--shadow); border-color: rgba(210,220,232,.9); }
+    .plot-wrap::before { content: "实时曲线"; position: absolute; z-index: 1; top: 14px; left: 16px; padding: 5px 9px; border-radius: 999px; color: #53647c; background: rgba(255,255,255,.88); border: 1px solid #e1e7ef; font-size: 11px; font-weight: 700; pointer-events: none; }
+    .stats { gap: 10px; background: linear-gradient(180deg,#fff,#f8fafc); }
+    .stat { padding: 10px; border-radius: 10px; background: #fff; }
+    .stat strong { color: var(--navy); font-variant-numeric: tabular-nums; }
+    .curve-list select { border-radius: 10px; padding: 6px; }
+    .history-head > span:first-child::before { content: "◫"; color: var(--blue); margin-right: 7px; }
+    .measurement-tools::before { content: "测量分析"; color: var(--navy); font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .tools label { min-height: 34px; padding: 0 2px; }
+    .curve-actions button { height: 36px; }
+    footer { justify-content: space-between; min-height: 42px; }
+    .protocol-help { position: relative; }
+    .protocol-help summary { cursor: pointer; color: #526175; font-weight: 600; }
+    .protocol-help p { position: absolute; right: 0; bottom: 25px; width: min(720px, 75vw); margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff; box-shadow: var(--shadow); line-height: 1.6; }
+    .session-tools { display: inline-flex; gap: 8px; align-items: center; }
+    .session-tools button { height: 30px; font-size: 12px; }
+    .demo { color: #7c3aed; border-color: #c4b5fd; background: #f5f3ff; }
+    .save-state { color: #0f766e; border-color: #99f6e4; background: #f0fdfa; }
+    .toast { position: fixed; right: 18px; bottom: 56px; z-index: 20; padding: 12px 16px; color: #fff; background: #17243a; border-radius: 10px; box-shadow: 0 14px 35px rgba(15,31,56,.22); opacity: 0; transform: translateY(8px); transition: .2s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* Precision-lab visual system */
+    :root {
+      --bg: #0b1219;
+      --panel: #121d27;
+      --panel-2: #172431;
+      --text: #e8f0f2;
+      --muted: #8495a5;
+      --line: #293846;
+      --green: #4dd9d2;
+      --blue: #4dd9d2;
+      --red: #ff7b72;
+      --orange: #ffb454;
+      --navy: #e8f0f2;
+      --cyan: #4dd9d2;
+      --shadow: 0 22px 55px rgba(0,0,0,.28);
+    }
+    body { background: #0b1219; color: var(--text); font-family: "Arial Narrow", "Microsoft YaHei UI", sans-serif; }
+    .app { grid-template-rows: auto minmax(0,1fr) auto; background: linear-gradient(140deg,#0c141c,#0a1016 60%); }
+    header { gap: 12px; padding: 12px 14px; background: #101a23; border-color: #263542; box-shadow: 0 10px 40px rgba(0,0,0,.2); }
+    .brand-heading { position: relative; border-left: 2px solid var(--cyan); padding-left: 14px; }
+    .brand-heading::after { content: "F411 / USB-UART"; display: block; width: max-content; margin-top: 9px; padding: 3px 6px; border: 1px solid #304453; color: #7390a1; font: 9px Consolas,monospace; letter-spacing: .08em; }
+    h1 { color: #f3f8f9; font-size: 18px; letter-spacing: .03em; }
+    h1::before { display: none; }
+    .brand-heading small { margin-left: 0; color: #5f788a; font: 9px Consolas,monospace; letter-spacing: .14em; }
+    label { color: #9aaab6; font-size: 12px; }
+    input,select,button,.button-link { height: 34px; border-color: #344654; color: #dce8eb; background: #0d171f; border-radius: 4px; font-family: inherit; }
+    input:focus,select:focus,button:focus-visible,.button-link:focus-visible { outline: 2px solid rgba(77,217,210,.75); outline-offset: 2px; }
+    button { transition: border-color .16s,color .16s,background .16s,transform .16s; }
+    button:hover:not(:disabled),.button-link:hover { border-color: #5c7888; color: #fff; background: #172633; }
+    button:active:not(:disabled) { transform: translateY(1px); }
+    button.primary { color: #061416; background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 20px rgba(77,217,210,.13); }
+    button.primary:hover:not(:disabled) { color: #041012; background: #70e6df; border-color: #70e6df; }
+    button.danger { color: #ff8d84; }
+    .toolbar-group { padding: 6px 7px; border-color: #293b48; border-radius: 5px; background: #131f29; }
+    .toolbar-group.scan { justify-content: flex-start; }
+    .toolbar-group.scan > .toolbar-group { background: #0e1821; border-color: #293b48; }
+    .toolbar-label { color: #607989; font: 9px Consolas,monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .mode-switch { border-radius: 3px; border-color: #344653; background: #0c161e; }
+    .mode-switch button { background: transparent; color: #7f93a1; }
+    .mode-switch button.active { color: #081516; background: var(--cyan); }
+    .demo { color: #ffcb85; border-color: #59492f; background: #241d13; }
+    .save-state { color: #7ddfd9; border-color: #28504f; background: #102524; }
+    main { grid-template-columns: minmax(0,1fr) 342px; gap: 10px; padding: 10px; background: transparent; }
+    .plot-wrap,aside,.dft-view { border-color: #2a3945; border-radius: 6px; background: #101a22; box-shadow: var(--shadow); }
+    .plot-wrap { border-top: 2px solid #38515d; }
+    .plot-wrap::before { content: "LIVE SIGNAL"; top: 11px; left: 14px; padding: 0; border: 0; border-radius: 0; color: var(--cyan); background: transparent; font: 9px Consolas,monospace; letter-spacing: .15em; }
+    .app.gm-view .plot-wrap::before { content: "TRANSCONDUCTANCE"; }
+    .plot-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: .11; background: repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(125,225,219,.08) 4px); }
+    .screen-hud { position: absolute; z-index: 3; top: 10px; right: 14px; display: flex; gap: 14px; pointer-events: none; color: #66808f; font: 9px Consolas,monospace; letter-spacing: .1em; }
+    .screen-hud b { color: var(--cyan); font-weight: 400; }
+    canvas { background: #09131a; }
+    aside { grid-template-rows: auto auto minmax(0,1fr); }
+    .stats { gap: 1px; padding: 0; border-color: #283945; background: #263744; }
+    .stat { padding: 13px 12px; border: 0; border-radius: 0; background: #121f29; }
+    .stat span { color: #69808f; font: 9px Consolas,monospace; letter-spacing: .08em; text-transform: uppercase; }
+    .stat strong { color: #e8f4f4; font: 600 17px Consolas,monospace; }
+    .tools { gap: 9px; padding: 13px; border-color: #283945; background: #101b24; }
+    .measurement-tools::before { color: #d9e6e8; font: 10px Consolas,monospace; letter-spacing: .13em; }
+    .tools label { color: #91a2ad; }
+    .display-options { border-color: #2a3b47; }
+    .display-options summary { color: #718795; }
+    .curve-list { padding: 13px; background: #0e1921; }
+    .history-head { color: #dae6e8; font: 600 11px Consolas,monospace; letter-spacing: .08em; }
+    .history-head > span:first-child::before { color: var(--cyan); }
+    .history-state { color: #607888; font: 10px Consolas,monospace; }
+    .curve-list select { border: 0; border-radius: 3px; color: #b8c9ce; background: #09131a; font: 11px Consolas,monospace; }
+    .curve-list select option { padding: 7px; }
+    .curve-actions { gap: 5px; }
+    .curve-actions button { font-size: 11px; }
+    .dft-view { background: #101a22; }
+    .dft-canvas-wrap { border-color: #2a3a46; border-radius: 4px; }
+    .analysis-note { color: #8397a3; }
+    footer { min-height: 36px; padding: 6px 14px; color: #627987; background: #0d171f; border-color: #263642; font: 10px Consolas,monospace; }
+    .dot { box-shadow: 0 0 0 3px rgba(156,163,175,.08); }
+    .dot.on { box-shadow: 0 0 10px rgba(77,217,210,.65); }
+    .protocol-help summary { color: #657d8b; }
+    .protocol-help p { color: #9aabb5; background: #111e28; border-color: #314552; }
+    .toast { color: #071416; background: var(--cyan); border-radius: 4px; font: 600 12px Consolas,monospace; }
+
+    /* Light clinical-instrument revision */
+    :root {
+      --bg: #edf3f5;
+      --panel: #ffffff;
+      --panel-2: #f5f9fa;
+      --text: #183039;
+      --muted: #71868e;
+      --line: #d6e1e4;
+      --green: #18a7a0;
+      --blue: #168f91;
+      --red: #d45b52;
+      --orange: #e69a3b;
+      --navy: #183039;
+      --cyan: #20b8b0;
+      --shadow: 0 16px 42px rgba(44,78,88,.10);
+    }
+    body { color: var(--text); background: #edf3f5; }
+    .app { background: radial-gradient(circle at 62% -20%,#ffffff 0,#f4f8f9 35%,#edf3f5 76%); }
+    header { background: rgba(255,255,255,.94); border-color: #d9e4e7; box-shadow: 0 8px 28px rgba(53,83,91,.06); backdrop-filter: blur(16px); }
+    .brand-heading { border-left-color: var(--cyan); }
+    .brand-heading::after { color: #729097; border-color: #cbdadd; background: #f8fbfb; }
+    h1 { color: #17333b; }
+    .brand-heading small { color: #8ca0a6; }
+    label { color: #647c84; }
+    input,select,button,.button-link { color: #29434a; background: #fff; border-color: #cfdde0; }
+    button:hover:not(:disabled),.button-link:hover { color: #12363a; background: #edf8f7; border-color: #8bc8c5; }
+    button.primary { color: #fff; background: #168f91; border-color: #168f91; box-shadow: 0 7px 18px rgba(22,143,145,.18); }
+    button.primary:hover:not(:disabled) { color: #fff; background: #11797b; border-color: #11797b; }
+    button.danger { color: #c94d45; }
+    .toolbar-group { background: #f5f9fa; border-color: #d8e4e6; }
+    .toolbar-group.scan > .toolbar-group { background: #fff; border-color: #d9e4e6; }
+    .toolbar-label { color: #8ba0a6; }
+    .mode-switch { background: #fff; border-color: #cadbdd; }
+    .mode-switch button { color: #6d838a; }
+    .mode-switch button.active { color: #fff; background: #168f91; }
+    .demo { color: #9c681f; border-color: #efd29e; background: #fff9ec; }
+    .save-state { color: #147c78; border-color: #a9dbd7; background: #f0fbfa; }
+    main { background: transparent; }
+    .plot-wrap,aside,.dft-view { background: rgba(255,255,255,.96); border-color: #d4e0e3; box-shadow: var(--shadow); }
+    .plot-wrap { border-top-color: #9bd5d2; }
+    .plot-wrap::before { color: #138b89; }
+    .plot-wrap::after { opacity: .18; background: repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(50,151,151,.055) 4px); }
+    .screen-hud { color: #91a4a9; }
+    .screen-hud b { color: #168f91; }
+    .it-time-marker {
+      position: absolute;
+      z-index: 4;
+      top: 34px;
+      right: 14px;
+      width: clamp(270px,24vw,340px);
+      padding: 10px 12px 9px;
+      border: 1px solid rgba(157,202,203,.82);
+      border-radius: 9px;
+      color: #25474e;
+      background: rgba(249,253,253,.94);
+      box-shadow: 0 10px 28px rgba(41,91,96,.11);
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+    .it-time-marker[hidden] { display: none; }
+    .it-time-row { display: grid; grid-template-columns: minmax(78px,1fr) auto auto; align-items: center; gap: 11px; }
+    .it-time-status { display: inline-flex; align-items: center; gap: 7px; min-width: 0; color: #58747a; font-size: clamp(.72rem,calc(.68rem + .06vw),.8rem); font-weight: 700; white-space: nowrap; }
+    .it-time-status i { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: #91a4a9; box-shadow: 0 0 0 4px rgba(145,164,169,.12); }
+    .it-time-marker[data-state="running"] .it-time-status i { background: #18a7a0; box-shadow: 0 0 0 4px rgba(24,167,160,.13); }
+    .it-time-marker[data-state="paused"] .it-time-status i { background: #e69a3b; box-shadow: 0 0 0 4px rgba(230,154,59,.14); }
+    .it-time-marker[data-state="done"] .it-time-status i { background: #168f91; }
+    .it-time-marker[data-state="stopped"] .it-time-status i,
+    .it-time-marker[data-state="error"] .it-time-status i { background: #d45b52; box-shadow: 0 0 0 4px rgba(212,91,82,.12); }
+    .it-time-value { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 6px; white-space: nowrap; }
+    .it-time-value + .it-time-value { padding-left: 11px; border-left: 1px solid #d7e6e7; }
+    .it-time-value small { color: #849a9f; font-size: clamp(.66rem,calc(.63rem + .04vw),.72rem); }
+    .it-time-value strong { color: #173a40; font: 700 clamp(.88rem,calc(.82rem + .16vw),1.06rem)/1 Consolas,"SFMono-Regular",monospace; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+    .it-time-value.remaining strong { color: #0e8582; }
+    .it-time-track { height: 3px; margin-top: 9px; overflow: hidden; border-radius: 999px; background: #dcebec; }
+    .it-time-track i { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#4fc8c1,#168f91); transition: width .2s linear; }
+    canvas { background: #f9fcfc; }
+    aside { grid-template-rows: auto auto auto minmax(0,1fr); }
+    .stats { background: #d9e5e7; border-color: #d5e1e3; }
+    .stat { background: #fbfdfd; }
+    .stat span { color: #81959b; }
+    .stat strong { color: #18343b; }
+    .advanced-results { padding: 13px; border-bottom: 1px solid #dce6e8; background: linear-gradient(135deg,#edf9f7,#f9fcfc); }
+    .advanced-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: #26464c; font-size: 12px; font-weight: 700; }
+    .advanced-head b { padding: 3px 7px; border-radius: 999px; color: #167a77; background: #d8f1ee; font: 9px Consolas,monospace; }
+    .algorithm-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
+    .algorithm-grid div { min-width: 0; padding: 8px; border: 1px solid #d8e7e8; background: rgba(255,255,255,.78); }
+    .algorithm-grid span,.algorithm-grid strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .algorithm-grid span { color: #83969b; font-size: 9px; margin-bottom: 5px; }
+    .algorithm-grid strong { color: #1b5558; font: 600 11px Consolas,monospace; }
+    .tools { background: #f8fbfb; border-color: #dbe5e7; }
+    .measurement-tools::before { color: #315158; }
+    .display-options { border-color: #d9e4e6; }
+    .display-options summary { color: #71878d; }
+    .curve-list { background: #fbfdfd; }
+    .history-head { color: #2f4a51; }
+    .history-state { color: #85999f; }
+    .curve-list select { color: #405c63; background: #f3f8f9; border: 1px solid #dce6e8; }
+    .dft-view { background: #fff; }
+    .dft-canvas-wrap { border-color: #d4e1e3; }
+    .analysis-note { color: #758a90; }
+    footer { color: #71878e; background: rgba(255,255,255,.92); border-color: #d5e1e3; }
+    .protocol-help summary { color: #71878e; }
+    .protocol-help p { color: #536b72; background: #fff; border-color: #cedde0; }
+    .toast { color: #fff; background: #167f80; }
+
+    /* Fluid type and contextual help */
+    html { font-size: clamp(15px, calc(14px + .14vw), 17px); }
+    body { font-size: 1rem; }
+    h1 { font-size: clamp(1.05rem, calc(.9rem + .45vw), 1.45rem); }
+    label { font-size: clamp(.86rem, calc(.82rem + .08vw), .96rem); }
+    input,select,button,.button-link { font-size: clamp(.84rem, calc(.8rem + .08vw), .94rem); }
+    .toolbar-group input { width: clamp(68px, 5.4vw, 94px); }
+    .stat strong { font-size: clamp(1rem, calc(.94rem + .18vw), 1.2rem); }
+    .stat span,.algorithm-grid span { font-size: clamp(.76rem, calc(.72rem + .06vw), .84rem); }
+    .algorithm-grid strong { font-size: clamp(.88rem, calc(.83rem + .08vw), .98rem); }
+    header { grid-template-columns: minmax(190px,230px) minmax(0,1fr); }
+    header > .brand-heading { grid-column: 1; }
+    header > .toolbar-group.scan { grid-column: 2; }
+    .toolbar-stack { grid-column: 1 / -1; grid-template-columns: minmax(340px,.8fr) minmax(590px,1.2fr); align-items: stretch; }
+    .toolbar-group.data { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; justify-content: stretch; gap: 12px; padding: 8px 10px; }
+    .toolbar-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; min-width: 0; }
+    .toolbar-actions > * { flex: 0 0 auto; white-space: nowrap; }
+    main { grid-template-columns: minmax(0,1fr) clamp(310px,24vw,370px); }
+    .label-copy,.algorithm-grid .metric-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+    .label-copy { flex: 1 1 auto; }
+    .algorithm-grid .metric-label { max-width: 100%; overflow: visible; }
+    .label-copy > span,.metric-label > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .help-button { width: 21px; min-width: 21px; height: 21px; margin: 0; padding: 0; display: inline-grid; place-items: center; flex: 0 0 21px; border: 1px solid #86bfbc; border-radius: 50%; color: #087c78; background: #edf9f8; font: 700 13px/1 Arial,sans-serif; box-shadow: none; vertical-align: middle; }
+    .help-button:hover:not(:disabled),.help-button[aria-expanded="true"] { color: #fff; border-color: #168f91; background: #168f91; }
+    .help-popover { position: fixed; z-index: 50; width: min(330px,calc(100vw - 24px)); padding: 14px 15px; border: 1px solid #bcd2d5; border-radius: 8px; color: #365159; background: rgba(255,255,255,.98); box-shadow: 0 18px 48px rgba(40,76,84,.2); opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .15s,transform .15s; }
+    .help-popover.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .help-popover strong { display: block; margin-bottom: 7px; color: #183c42; font-size: .92rem; }
+    .help-popover p { margin: 0; color: #5d747b; font-size: .8rem; line-height: 1.6; }
+    .help-popover code { padding: 1px 4px; border-radius: 3px; color: #116f6d; background: #eaf7f6; }
+    .toolbar-label { font-size: .68rem; }
+    .measurement-tools::before,.history-head { font-size: .82rem; }
+    .history-state { font-size: .72rem; }
+    .curve-list select,.curve-actions button { font-size: .8rem; }
+    .advanced-head { font-size: .86rem; }
+    .advanced-head b { font-size: .68rem; }
+
+    /* Gas-sensor workspace ------------------------------------------------ */
+    .workspace-jump {
+      align-self: flex-start;
+      width: max-content;
+      height: 26px;
+      margin: 7px 0 0 30px;
+      padding: 0 9px;
+      border-color: #acd9d5;
+      color: #0f766e;
+      background: #effcf9;
+      font-size: 11px;
+      letter-spacing: .04em;
+    }
+
+    .gas-workspace {
+      --gas-ink: #153139;
+      --gas-muted: #5d7479;
+      --gas-paper: #f3f7f4;
+      --gas-panel: #fffefb;
+      --gas-line: #cbdad6;
+      --gas-cyan: #0e8e8c;
+      --gas-cyan-soft: #dff4f0;
+      --gas-amber: #d88416;
+      --gas-red: #c83d45;
+      display: none;
+      min-height: 100vh;
+      color: var(--gas-ink);
+      background:
+        linear-gradient(rgba(17, 88, 88, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17, 88, 88, .035) 1px, transparent 1px),
+        var(--gas-paper);
+      background-size: 24px 24px;
+      font-family: "Bahnschrift", "Microsoft YaHei", sans-serif;
+    }
+
+    .app.gas-mode {
+      display: block;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .app.gas-mode > header,
+    .app.gas-mode > main,
+    .app.gas-mode > footer {
+      display: none;
+    }
+
+    .app.gas-mode .gas-workspace {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    .gas-header {
+      display: grid;
+      grid-template-columns: minmax(250px, .8fr) minmax(520px, 1.7fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--gas-line);
+      background: rgba(255, 254, 251, .94);
+      box-shadow: 0 8px 24px rgba(31, 73, 75, .06);
+    }
+
+    .gas-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .gas-brand-mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid #87c9c2;
+      border-radius: 50%;
+      color: var(--gas-cyan);
+      background:
+        radial-gradient(circle at 34% 34%, #fff 0 10%, transparent 11%),
+        linear-gradient(135deg, #e9fbf7, #cceae5);
+      font: 700 12px/1 Consolas, monospace;
+      box-shadow: inset 0 0 0 5px rgba(255,255,255,.55);
+    }
+
+    .gas-brand h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 720;
+      letter-spacing: .02em;
+    }
+
+    .gas-brand p {
+      margin: 3px 0 0;
+      color: var(--gas-muted);
+      font: 10px/1.3 Consolas, monospace;
+      letter-spacing: .13em;
+    }
+
+    .gas-control-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 8px 10px;
+      border: 1px solid var(--gas-line);
+      border-radius: 10px;
+      background: #f8fbf8;
+    }
+
+    .gas-control-strip label {
+      color: var(--gas-muted);
+      font-size: 12px;
+    }
+
+    .gas-control-strip [hidden] {
+      display: none !important;
+    }
+
+    .gas-control-strip select,
+    .gas-control-strip input,
+    .gas-cal-grid input {
+      border-color: var(--gas-line);
+      background: var(--gas-panel);
+    }
+
+    .gas-control-strip button.primary,
+    .gas-primary {
+      color: #fff;
+      border-color: var(--gas-cyan);
+      background: var(--gas-cyan);
+    }
+
+    .gas-control-strip button.danger {
+      color: var(--gas-red);
+      border-color: #e5b7ba;
+      background: #fff8f8;
+    }
+
+    .gas-link-protocol {
+      padding: 4px 7px;
+      border: 1px solid #b8d9d4;
+      border-radius: 999px;
+      color: #39706f;
+      background: #edf8f5;
+      font: 9px/1 Consolas, monospace;
+      letter-spacing: .04em;
+      white-space: nowrap;
+    }
+
+    .gas-link-protocol.serial {
+      border-color: #d7c6a7;
+      color: #846126;
+      background: #fff8e9;
+    }
+
+    .gas-page-switch {
+      border-color: var(--gas-line);
+      color: var(--gas-muted);
+      background: transparent;
+    }
+
+    .gas-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 350px;
+      gap: 14px;
+      min-height: 0;
+      padding: 14px;
+    }
+
+    .gas-stage {
+      display: grid;
+      grid-template-rows: auto minmax(360px, 1fr);
+      gap: 12px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .gas-flow {
+      display: grid;
+      grid-template-columns: 130px minmax(90px, 1fr) 155px minmax(90px, 1fr) 130px;
+      align-items: center;
+      gap: 8px;
+      min-height: 82px;
+      padding: 12px 16px;
+      overflow: hidden;
+      border: 1px solid var(--gas-line);
+      border-radius: 12px;
+      background: var(--gas-panel);
+      box-shadow: 0 12px 28px rgba(31, 73, 75, .07);
+    }
+
+    .gas-node {
+      min-width: 0;
+      padding: 9px 10px;
+      border-left: 3px solid var(--gas-cyan);
+      background: #f3faf8;
+    }
+
+    .gas-node.sensor {
+      border-left-color: var(--gas-amber);
+      background: #fff7e8;
+    }
+
+    .gas-node span {
+      display: block;
+      color: var(--gas-muted);
+      font: 10px/1.2 Consolas, monospace;
+      letter-spacing: .08em;
+    }
+
+    .gas-node strong {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      font-size: 14px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gas-wire {
+      position: relative;
+      height: 2px;
+      background: #a9cbc6;
+    }
+
+    .gas-wire::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gas-cyan);
+      box-shadow: 0 0 0 4px rgba(14, 142, 140, .13);
+      animation: gas-current 1.8s linear infinite;
+    }
+
+    .gas-workspace[data-running="false"] .gas-wire::after {
+      animation-play-state: paused;
+      opacity: .25;
+    }
+
+    @keyframes gas-current {
+      from { left: 0; }
+      to { left: calc(100% - 8px); }
+    }
+
+    .gas-chart-card {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 0;
+      overflow: hidden;
+      border: 1px solid var(--gas-line);
+      border-radius: 12px;
+      background: var(--gas-panel);
+      box-shadow: 0 14px 30px rgba(31, 73, 75, .08);
+    }
+
+    .gas-chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-height: 50px;
+      padding: 9px 13px;
+      border-bottom: 1px solid #dfe9e5;
+    }
+
+    .gas-chart-title {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .gas-chart-title strong {
+      font-size: 14px;
+    }
+
+    .gas-chart-title span {
+      color: var(--gas-muted);
+      font: 10px Consolas, monospace;
+    }
+
+    .gas-chart-tools {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .gas-chart-tools label {
+      font-size: 11px;
+    }
+
+    .gas-chart-tools select,
+    .gas-chart-tools button {
+      height: 28px;
+      padding: 0 8px;
+      font-size: 11px;
+    }
+
+    .gas-canvas-wrap {
+      position: relative;
+      min-height: 0;
+    }
+
+    #gasPlot {
+      width: 100%;
+      height: 100%;
+      min-height: 350px;
+    }
+
+    .gas-empty {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      color: #789095;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .gas-empty[hidden] {
+      display: none;
+    }
+
+    .gas-empty strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #49656a;
+      font-size: 15px;
+    }
+
+    .gas-empty small {
+      font: 11px Consolas, monospace;
+    }
+
+    .gas-rail {
+      display: grid;
+      grid-template-rows: auto auto minmax(150px, 1fr);
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .gas-panel {
+      overflow: hidden;
+      border: 1px solid var(--gas-line);
+      border-radius: 12px;
+      background: var(--gas-panel);
+      box-shadow: 0 12px 28px rgba(31, 73, 75, .06);
+    }
+
+    .gas-panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 38px;
+      padding: 8px 11px;
+      border-bottom: 1px solid #e1eae7;
+      color: var(--gas-muted);
+      font: 700 10px Consolas, monospace;
+      letter-spacing: .1em;
+    }
+
+    .gas-state-pill {
+      padding: 3px 7px;
+      border: 1px solid #b6ccc7;
+      border-radius: 999px;
+      color: #49656a;
+      background: #f4f8f6;
+      letter-spacing: .04em;
+    }
+
+    .gas-state-pill.running {
+      color: #08736f;
+      border-color: #85cdc3;
+      background: #e8f8f4;
+    }
+
+    .gas-state-pill.alarm {
+      color: #a32731;
+      border-color: #e4a9ae;
+      background: #fff1f2;
+    }
+
+    .gas-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: #e5ece9;
+    }
+
+    .gas-metric {
+      min-width: 0;
+      padding: 11px;
+      background: var(--gas-panel);
+    }
+
+    .gas-metric span {
+      display: block;
+      color: var(--gas-muted);
+      font-size: 10px;
+    }
+
+    .gas-metric strong {
+      display: block;
+      margin-top: 5px;
+      overflow: hidden;
+      font: 700 19px/1.1 "Bahnschrift", Consolas, sans-serif;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gas-metric small {
+      margin-left: 3px;
+      color: #71868a;
+      font-size: 9px;
+    }
+
+    .gas-quality {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      padding: 9px 10px;
+      border-top: 1px solid #e1eae7;
+    }
+
+    .gas-quality-chip {
+      padding: 3px 6px;
+      border-radius: 4px;
+      color: #526d71;
+      background: #eef4f2;
+      font: 10px Consolas, monospace;
+    }
+
+    .gas-quality-chip.warn {
+      color: #9a5b0b;
+      background: #fff0d7;
+    }
+
+    .gas-quality-chip.bad {
+      color: #a32731;
+      background: #ffe7e9;
+    }
+
+    .gas-cal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      padding: 11px;
+    }
+
+    .gas-cal-grid label {
+      display: grid;
+      gap: 4px;
+      color: var(--gas-muted);
+      font-size: 10px;
+    }
+
+    .gas-cal-grid label.wide,
+    .gas-cal-grid .wide {
+      grid-column: 1 / -1;
+    }
+
+    .gas-cal-grid input,
+    .gas-cal-grid select {
+      width: 100%;
+      height: 30px;
+      font: 12px Consolas, monospace;
+    }
+
+    .gas-cal-actions {
+      display: flex;
+      gap: 7px;
+      grid-column: 1 / -1;
+    }
+
+    .gas-cal-actions button {
+      flex: 1;
+      height: 30px;
+      padding: 0 6px;
+      font-size: 11px;
+    }
+
+    .gas-console {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-height: 0;
+    }
+
+    #gasLog {
+      min-height: 120px;
+      margin: 0;
+      padding: 10px;
+      overflow: auto;
+      color: #38565b;
+      background: #f8fbf9;
+      font: 10px/1.5 Consolas, monospace;
+      white-space: pre-wrap;
+    }
+
+    .gas-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 38px;
+      padding: 7px 16px;
+      border-top: 1px solid var(--gas-line);
+      color: var(--gas-muted);
+      background: rgba(255, 254, 251, .96);
+      font: 10px Consolas, monospace;
+    }
+
+    .gas-footer-status {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .gas-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #b5c2c0;
+    }
+
+    .gas-dot.on {
+      background: #12a39b;
+      box-shadow: 0 0 0 4px rgba(18, 163, 155, .13);
+    }
+
+    @media (max-width: 1100px) and (min-width: 901px) {
+      header { grid-template-columns: 210px minmax(0,1fr); }
+      .toolbar-stack { grid-template-columns: 1fr; }
+      main { grid-template-columns: minmax(0,1fr) 320px; }
+      .gas-header { grid-template-columns: 1fr; }
+      .gas-main { grid-template-columns: minmax(0,1fr) 320px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+    @media (max-width: 900px) {
+      header { grid-template-columns: 1fr; }
+      header > .brand-heading,
+      header > .toolbar-group.scan,
+      .toolbar-stack { grid-column: 1; }
+      .brand-heading { align-items: flex-start; }
+      .brand-heading small { margin-left: 30px; }
+      main { grid-template-columns: 1fr; }
+      .analysis-grid { grid-template-columns: 1fr 1fr; }
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100vh; }
+      canvas { height: 420px; }
+      .plot-wrap::before { display: none; }
+      .screen-hud { display: none; }
+      .it-time-marker { top: 12px; right: 12px; width: min(320px,calc(100% - 24px)); }
+      main { padding: 8px; }
+      .plot-wrap,aside,.dft-view { border-radius: 4px; }
+      .toolbar-group input { width: min(112px,34vw); }
+      .toolbar-stack { grid-template-columns: 1fr; }
+      .toolbar-group.data { grid-template-columns: 1fr; }
+      .toolbar-group.data > .toolbar-label { text-align: center; }
+      .algorithm-grid { grid-template-columns: 1fr; }
+      .algorithm-grid div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .algorithm-grid span { margin: 0; }
+      .help-button { width: 23px; min-width: 23px; height: 23px; flex-basis: 23px; font-size: 14px; }
+      .gas-header { grid-template-columns: 1fr; padding: 10px; }
+      .gas-main { grid-template-columns: 1fr; padding: 8px; }
+      .gas-flow { grid-template-columns: 1fr; }
+      .gas-wire { width: 2px; height: 28px; margin-left: 50%; }
+      .gas-wire::after { left: -3px; animation: none; }
+      .gas-rail { min-height: 600px; }
+      .gas-footer { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app">
+    <header>
+      <div class="brand-heading">
+        <h1>便携式 EGFET 测试</h1>
+        <small>CURVE ACQUISITION WORKBENCH</small>
+        <button id="switchToGas" class="workspace-jump" type="button">气体传感工作区 →</button>
+      </div>
+      <section class="toolbar-group scan">
+        <span class="toolbar-label">模式</span>
+        <span class="mode-switch">
+          <button id="modeTransfer" class="active" type="button">转移曲线</button>
+          <button id="modeIT" type="button">IT 曲线</button>
+          <button id="modeDFT" type="button">噪声 PSD</button>
+        </span>
+        <span id="transferParams" class="toolbar-group">
+          <label>起始 Vgs mV <input id="scanStart" type="number" value="0"></label>
+          <label>结束 Vgs mV <input id="scanEnd" type="number" value="1500"></label>
+          <label>速率 mV/s <input id="scanRate" type="number" value="30" min="1"></label>
+          <label>Vgs偏移 mV <input id="scanOffset" type="number" value="0"></label>
+        </span>
+        <span id="itParams" class="toolbar-group" style="display:none">
+          <label>Vgs mV <input id="itVgs" type="number" value="1000"></label>
+          <label>采集 s <input id="itDuration" type="number" value="300" min="1"></label>
+          <label>间隔 ms <input id="itInterval" type="number" value="100" min="1"></label>
+          <label>稳定 s <input id="itSettle" type="number" value="2" min="0"></label>
+        </span>
+        <label>Vds(VA) mV <input id="vdsMv" type="number" value="4.5" min="0" step="0.1"></label>
+        <label>重复 <input id="repeatCount" type="number" value="1" min="1"></label>
+        <label>间隔 s <input id="repeatInterval" type="number" value="5" min="0"></label>
+          <button id="startScan" class="primary" disabled>▶ 开始测试</button>
+          <button id="pauseTest" disabled>Ⅱ 暂停</button>
+          <button id="stopTest" class="danger" disabled>■ 停止</button>
+      </section>
+      <section class="toolbar-stack">
+        <section class="toolbar-group data">
+          <span class="toolbar-label">串口</span>
+          <div class="toolbar-actions serial-actions">
+            <label>波特率
+              <select id="baud">
+                <option value="115200" selected>115200</option>
+                <option value="57600">57600</option>
+                <option value="9600">9600</option>
+              </select>
+            </label>
+            <button id="connect" class="primary">连接设备</button>
+            <button id="disconnect" disabled>断开</button>
+            <a class="button-link driver" href="drivers/CH340/CH341SER.EXE" download>CH340驱动</a>
+          </div>
+        </section>
+        <section class="toolbar-group data">
+          <span class="toolbar-label">数据</span>
+          <div class="toolbar-actions data-actions">
+            <button id="demoData" class="demo">演示数据</button>
+            <button id="saveSession" class="save-state">保存会话</button>
+            <button id="clear" class="danger">清空</button>
+            <button id="saveCurve">保存当前曲线</button>
+            <button id="import">导入 CSV</button>
+            <button id="export">导出 CSV</button>
+          </div>
+        </section>
+      </section>
+      <input id="importFile" type="file" accept=".csv,text/csv" style="display:none">
+    </header>
+
+    <main>
+      <section class="plot-wrap">
+        <div class="screen-hud"><span>CH1 <b id="plotSignalLabel">Ids</b></span><span>ACQ <b>AUTO</b></span><span>GRID <b>8×8</b></span></div>
+        <div id="itTimeMarker" class="it-time-marker" data-state="idle" hidden aria-label="IT 测试计时">
+          <div class="it-time-row">
+            <span class="it-time-status"><i aria-hidden="true"></i><span id="itTimeState" aria-live="polite">待开始</span></span>
+            <span class="it-time-value"><small>已用</small><strong id="itElapsed">00:00</strong></span>
+            <span class="it-time-value remaining"><small>剩余</small><strong id="itRemaining">--:--</strong></span>
+          </div>
+          <span class="it-time-track" aria-hidden="true"><i id="itTimeProgress"></i></span>
+        </div>
+        <canvas id="plot"></canvas>
+      </section>
+
+      <aside>
+        <section class="stats">
+          <div class="stat"><span id="fixedCurrentLabel">Vgs@Ids</span><strong id="fixedCurrentVgs">未启用</strong></div>
+          <div id="referenceStat" class="stat"><span>参考曲线</span><strong id="referenceCurve">未设置</strong></div>
+          <div class="stat"><span id="deltaVgsLabel">ΔVgs@Ids</span><strong id="deltaVgs">--</strong></div>
+          <div id="repeatabilityStat" class="stat"><span>重复性</span><strong id="repeatability">--</strong></div>
+        </section>
+
+        <section class="advanced-results">
+          <div class="advanced-head">
+            <span>算法分析</span>
+            <b id="algorithmBadge">等待数据</b>
+          </div>
+          <div class="algorithm-grid">
+            <div><span id="advancedLabel1">线性外推 Vth</span><strong id="advancedValue1">--</strong></div>
+            <div><span id="advancedLabel2">最大跨导 gm</span><strong id="advancedValue2">--</strong></div>
+            <div><span id="advancedLabel3">拟合优度 R²</span><strong id="advancedValue3">--</strong></div>
+          </div>
+          <button id="toggleGmCurve" class="gm-curve-toggle" type="button">查看跨导曲线</button>
+        </section>
+
+        <section class="tools">
+          <div class="measurement-tools">
+            <label>固定电流阈值 <input id="fixedIdsEnable" type="checkbox"></label>
+            <label>固定 Ids mA <input id="fixedIds" type="number" value="5" min="0" step="0.1" disabled></label>
+            <button id="fit">自动适应坐标</button>
+          </div>
+          <details class="display-options">
+            <summary>高级显示设置</summary>
+            <div>
+              <label>显示平滑 <input id="smoothEnable" type="checkbox" checked></label>
+              <label>平滑窗口 点 <input id="smoothWindow" type="number" value="5" min="1" step="2"></label>
+              <label>横轴最小 mV <input id="xmin" type="number" placeholder="自动"></label>
+              <label>横轴最大 mV <input id="xmax" type="number" placeholder="自动"></label>
+              <label><span id="yminLabel" class="label-text">纵轴最小 uA</span> <input id="ymin" type="number" placeholder="自动"></label>
+              <label><span id="ymaxLabel" class="label-text">纵轴最大 uA</span> <input id="ymax" type="number" placeholder="自动"></label>
+              <button id="redraw">刷新坐标</button>
+            </div>
+          </details>
+        </section>
+
+        <section class="curve-list">
+          <div class="history-head">
+            <span>历史曲线</span>
+            <span class="history-state"><span id="state">未连接</span> · <span id="qualitySummary">质量 --</span></span>
+          </div>
+          <select id="curveSelect" size="12"></select>
+          <div class="curve-actions">
+            <button id="restoreCurve">查看曲线</button>
+            <button id="setReferenceCurve">设为参考</button>
+            <button id="deleteCurve" class="danger">删除</button>
+          </div>
+        </section>
+
+        <pre id="log" class="log" hidden></pre>
+      </aside>
+
+      <section id="dftView" class="dft-view">
+        <section class="toolbar-group">
+          <span class="toolbar-label">Welch 功率谱密度</span>
+          <label>数据源
+            <select id="dftSource">
+              <option value="current">当前曲线</option>
+              <option value="selected">选中历史曲线</option>
+            </select>
+          </label>
+          <button id="runDft" class="primary" type="button">重新分析</button>
+          <span class="analysis-note">Hann 窗、50% 重叠分段平均。建议优先分析采样间隔稳定的 IT 曲线。</span>
+        </section>
+
+        <section class="analysis-grid">
+          <div class="stat"><span>采样率</span><strong id="dftSampleRate">--</strong></div>
+          <div class="stat"><span>均值</span><strong id="dftMean">--</strong></div>
+          <div class="stat"><span>标准差</span><strong id="dftStd">--</strong></div>
+          <div class="stat"><span>峰峰值</span><strong id="dftPeak">--</strong></div>
+          <div class="stat"><span>漂移</span><strong id="dftDrift">--</strong></div>
+          <div class="stat"><span>主频峰</span><strong id="dftMainFreq">--</strong></div>
+        </section>
+
+        <section class="dft-canvas-wrap">
+          <canvas id="dftCanvas"></canvas>
+        </section>
+
+        <pre id="dftNote" class="analysis-note"></pre>
+      </section>
+    </main>
+
+    <footer>
+      <span><i id="dot" class="dot"></i> <span id="portText">等待连接</span></span>
+      <details class="protocol-help">
+        <summary>通信协议说明</summary>
+        <p>命令：<code>SCAN start,end,rate,offset,vds_uV</code> / <code>IT vgs,duration,interval,settle,vds_uV</code><br>数据：<code>X,ADC_uV</code>；质量：<code>Q,x,span_uV,time_ms,flag</code>；纵轴显示：<code>Ids</code>。</p>
+      </details>
+    </footer>
+
+    <section id="gasWorkspace" class="gas-workspace" data-running="false" aria-label="气体传感工作区">
+      <div class="gas-header">
+        <div class="gas-brand">
+          <div class="gas-brand-mark">ΔR</div>
+          <div>
+            <h2>便携式气体传感监测</h2>
+            <p>2.000 V BIAS · CURRENT / RESISTANCE TRACE</p>
+          </div>
+        </div>
+
+        <div class="gas-control-strip">
+          <label>连接
+            <select id="gasTransport">
+              <option value="bluetooth" selected>蓝牙 BLE</option>
+              <option value="serial">USB 串口</option>
+            </select>
+          </label>
+          <label id="gasBaudGroup" hidden>串口 <select id="gasBaud"><option value="115200">115200 · 8N1</option></select></label>
+          <span id="gasLinkProtocol" class="gas-link-protocol">FFE0 · TX FFE1 · RX FFE2</span>
+          <button id="gasConnect" class="primary" type="button">连接蓝牙</button>
+          <button id="gasDisconnect" type="button" disabled>断开</button>
+          <label>输出率
+            <select id="gasRate">
+              <option value="1">1 Hz</option>
+              <option value="2">2 Hz</option>
+              <option value="5">5 Hz</option>
+              <option value="10" selected>10 Hz</option>
+              <option value="20">20 Hz</option>
+            </select>
+          </label>
+          <button id="gasStart" class="primary" type="button" disabled>▶ 开始采集</button>
+          <button id="gasStop" class="danger" type="button" disabled>■ 安全停止</button>
+          <button id="gasStatus" type="button" disabled>读取状态</button>
+        </div>
+
+        <button id="switchToEgFet" class="gas-page-switch" type="button">← EGFET 工作区</button>
+      </div>
+
+      <div class="gas-main">
+        <div class="gas-stage">
+          <section class="gas-flow" aria-label="传感器关键电流路径">
+            <div class="gas-node">
+              <span>FORCE NODE</span>
+              <strong id="gasForceNode">0.498 V</strong>
+            </div>
+            <div class="gas-wire" aria-hidden="true"></div>
+            <div class="gas-node sensor">
+              <span>SENSOR · 2 V BIAS</span>
+              <strong id="gasPathCurrent">-- µA →</strong>
+            </div>
+            <div class="gas-wire" aria-hidden="true"></div>
+            <div class="gas-node">
+              <span>TIA / VCM</span>
+              <strong id="gasTiaNode">-- V</strong>
+            </div>
+          </section>
+
+          <section class="gas-chart-card">
+            <div class="gas-chart-head">
+              <div class="gas-chart-title">
+                <strong>实时响应轨迹</strong>
+                <span id="gasPointCount">0 SAMPLES</span>
+              </div>
+              <div class="gas-chart-tools">
+                <label>显示
+                  <select id="gasMetric">
+                    <option value="current">电流 / µA</option>
+                    <option value="resistance">阻值 / MΩ</option>
+                    <option value="response">归一化响应 / %</option>
+                  </select>
+                </label>
+                <label><input id="gasSmooth" type="checkbox" checked> 仅显示平滑</label>
+                <button id="gasBaseline" type="button">记录基线</button>
+                <button id="gasExpose" type="button">标记通气</button>
+                <button id="gasRecover" type="button">标记恢复</button>
+                <button id="gasClear" class="danger" type="button">清空</button>
+                <button id="gasDemo" type="button">演示</button>
+                <button id="gasExport" type="button">导出 CSV</button>
+              </div>
+            </div>
+            <div class="gas-canvas-wrap">
+              <canvas id="gasPlot"></canvas>
+              <div id="gasEmpty" class="gas-empty">
+                <div><strong>等待气体传感数据</strong><small>连接后发送 GAS,START · 原始 ADC 码将随 CSV 保留</small></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="gas-rail">
+          <section class="gas-panel">
+            <div class="gas-panel-title">
+              LIVE MEASUREMENT
+              <span id="gasDeviceState" class="gas-state-pill">OFF</span>
+            </div>
+            <div class="gas-metrics">
+              <div class="gas-metric"><span>传感电流</span><strong id="gasCurrent">--<small>µA</small></strong></div>
+              <div class="gas-metric"><span>传感阻值</span><strong id="gasResistance">--<small>MΩ</small></strong></div>
+              <div class="gas-metric"><span>ΔI / I₀</span><strong id="gasResponse">--<small>%</small></strong></div>
+              <div class="gas-metric"><span>换算浓度</span><strong id="gasConcentration">未标定</strong></div>
+              <div class="gas-metric"><span>传感器偏置</span><strong id="gasBias">--<small>V</small></strong></div>
+              <div class="gas-metric"><span>电池 / USB</span><strong id="gasPower">--</strong></div>
+            </div>
+            <div id="gasQuality" class="gas-quality"><span class="gas-quality-chip">等待质量标志</span></div>
+          </section>
+
+          <section class="gas-panel">
+            <div class="gas-panel-title">CALIBRATION & EVENTS <span>RAM CAL</span></div>
+            <div class="gas-cal-grid">
+              <label>零点差分 / µV<input id="gasZeroUv" type="number" value="0" min="-500000" max="500000"></label>
+              <label>跨阻 Rf / Ω<input id="gasRfOhm" type="number" value="12000" min="1000" max="10000000"></label>
+              <label>浓度斜率 / ppm·%⁻¹<input id="gasPpmSlope" type="number" step="any" placeholder="留空则不换算"></label>
+              <label>浓度截距 / ppm<input id="gasPpmOffset" type="number" step="any" value="0"></label>
+              <div class="gas-cal-actions">
+                <button id="gasApplyCal" class="gas-primary" type="button" disabled>写入零点与 Rf</button>
+                <button id="gasSaveModel" type="button">保存浓度模型</button>
+              </div>
+              <div class="wide" style="color:#6d8184;font-size:10px;line-height:1.45">
+                浓度模型：ppm = 截距 + 斜率 × (ΔI/I₀)。未用标准气体标定前只显示响应，不宣称真实浓度。
+              </div>
+            </div>
+          </section>
+
+          <section class="gas-panel gas-console">
+            <div class="gas-panel-title">DEVICE CONSOLE <span id="gasFirmware">FW --</span></div>
+            <pre id="gasLog">等待设备连接…</pre>
+          </section>
+        </div>
+      </div>
+
+      <div class="gas-footer">
+        <span class="gas-footer-status"><i id="gasDot" class="gas-dot"></i><span id="gasPortText">等待蓝牙连接</span></span>
+        <span>协议：GAS,D,seq,t_ms,I_nA,R_Ω,Vs_uV,VTIA_uV,VCM_uV,VFORCE_uV,BAT_mV,VBUS_mV,flags,RAW×6</span>
+        <span id="gasLastFrame">LAST FRAME --</span>
+      </div>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="helpPopover" class="help-popover" role="dialog" aria-live="polite"><strong id="helpTitle"></strong><p id="helpText"></p></div>
+  </div>
+
+  <script src="gas_recovery_policy.js"></script>
+  <script>
+    const els = {
+      app: document.getElementById("app"),
+      canvas: document.getElementById("plot"),
+      itTimeMarker: document.getElementById("itTimeMarker"),
+      itTimeState: document.getElementById("itTimeState"),
+      itElapsed: document.getElementById("itElapsed"),
+      itRemaining: document.getElementById("itRemaining"),
+      itTimeProgress: document.getElementById("itTimeProgress"),
+      modeTransfer: document.getElementById("modeTransfer"),
+      modeIT: document.getElementById("modeIT"),
+      modeDFT: document.getElementById("modeDFT"),
+      transferParams: document.getElementById("transferParams"),
+      itParams: document.getElementById("itParams"),
+      dftView: document.getElementById("dftView"),
+      dftCanvas: document.getElementById("dftCanvas"),
+      dftSource: document.getElementById("dftSource"),
+      runDft: document.getElementById("runDft"),
+      dftSampleRate: document.getElementById("dftSampleRate"),
+      dftMean: document.getElementById("dftMean"),
+      dftStd: document.getElementById("dftStd"),
+      dftPeak: document.getElementById("dftPeak"),
+      dftDrift: document.getElementById("dftDrift"),
+      dftMainFreq: document.getElementById("dftMainFreq"),
+      dftNote: document.getElementById("dftNote"),
+      connect: document.getElementById("connect"),
+      disconnect: document.getElementById("disconnect"),
+      scanStart: document.getElementById("scanStart"),
+      scanEnd: document.getElementById("scanEnd"),
+      scanRate: document.getElementById("scanRate"),
+      scanOffset: document.getElementById("scanOffset"),
+      vdsMv: document.getElementById("vdsMv"),
+      itVgs: document.getElementById("itVgs"),
+      itDuration: document.getElementById("itDuration"),
+      itInterval: document.getElementById("itInterval"),
+      itSettle: document.getElementById("itSettle"),
+      repeatCount: document.getElementById("repeatCount"),
+      repeatInterval: document.getElementById("repeatInterval"),
+      startScan: document.getElementById("startScan"),
+      pauseTest: document.getElementById("pauseTest"),
+      stopTest: document.getElementById("stopTest"),
+      clear: document.getElementById("clear"),
+      demoData: document.getElementById("demoData"),
+      saveSession: document.getElementById("saveSession"),
+      toast: document.getElementById("toast"),
+      helpPopover: document.getElementById("helpPopover"),
+      helpTitle: document.getElementById("helpTitle"),
+      helpText: document.getElementById("helpText"),
+      export: document.getElementById("export"),
+      import: document.getElementById("import"),
+      importFile: document.getElementById("importFile"),
+      saveCurve: document.getElementById("saveCurve"),
+      curveSelect: document.getElementById("curveSelect"),
+      restoreCurve: document.getElementById("restoreCurve"),
+      setReferenceCurve: document.getElementById("setReferenceCurve"),
+      deleteCurve: document.getElementById("deleteCurve"),
+      redraw: document.getElementById("redraw"),
+      fit: document.getElementById("fit"),
+      baud: document.getElementById("baud"),
+      log: document.getElementById("log"),
+      state: document.getElementById("state"),
+      fixedCurrentLabel: document.getElementById("fixedCurrentLabel"),
+      fixedCurrentVgs: document.getElementById("fixedCurrentVgs"),
+      referenceCurve: document.getElementById("referenceCurve"),
+      referenceStat: document.getElementById("referenceStat"),
+      deltaVgsLabel: document.getElementById("deltaVgsLabel"),
+      deltaVgs: document.getElementById("deltaVgs"),
+      repeatability: document.getElementById("repeatability"),
+      repeatabilityStat: document.getElementById("repeatabilityStat"),
+      qualitySummary: document.getElementById("qualitySummary"),
+      algorithmBadge: document.getElementById("algorithmBadge"),
+      advancedLabel1: document.getElementById("advancedLabel1"),
+      advancedValue1: document.getElementById("advancedValue1"),
+      advancedLabel2: document.getElementById("advancedLabel2"),
+      advancedValue2: document.getElementById("advancedValue2"),
+      advancedLabel3: document.getElementById("advancedLabel3"),
+      advancedValue3: document.getElementById("advancedValue3"),
+      toggleGmCurve: document.getElementById("toggleGmCurve"),
+      plotSignalLabel: document.getElementById("plotSignalLabel"),
+      dot: document.getElementById("dot"),
+      portText: document.getElementById("portText"),
+      xmin: document.getElementById("xmin"),
+      xmax: document.getElementById("xmax"),
+      ymin: document.getElementById("ymin"),
+      ymax: document.getElementById("ymax"),
+      yminLabel: document.getElementById("yminLabel"),
+      ymaxLabel: document.getElementById("ymaxLabel"),
+      fixedIdsEnable: document.getElementById("fixedIdsEnable"),
+      fixedIds: document.getElementById("fixedIds"),
+      smoothEnable: document.getElementById("smoothEnable"),
+      smoothWindow: document.getElementById("smoothWindow"),
+    };
+
+    const gasEls = {
+      workspace: document.getElementById("gasWorkspace"),
+      switchToGas: document.getElementById("switchToGas"),
+      switchToEgFet: document.getElementById("switchToEgFet"),
+      transport: document.getElementById("gasTransport"),
+      baudGroup: document.getElementById("gasBaudGroup"),
+      baud: document.getElementById("gasBaud"),
+      linkProtocol: document.getElementById("gasLinkProtocol"),
+      connect: document.getElementById("gasConnect"),
+      disconnect: document.getElementById("gasDisconnect"),
+      rate: document.getElementById("gasRate"),
+      start: document.getElementById("gasStart"),
+      stop: document.getElementById("gasStop"),
+      status: document.getElementById("gasStatus"),
+      plot: document.getElementById("gasPlot"),
+      empty: document.getElementById("gasEmpty"),
+      pointCount: document.getElementById("gasPointCount"),
+      metric: document.getElementById("gasMetric"),
+      smooth: document.getElementById("gasSmooth"),
+      baseline: document.getElementById("gasBaseline"),
+      expose: document.getElementById("gasExpose"),
+      recover: document.getElementById("gasRecover"),
+      clear: document.getElementById("gasClear"),
+      demo: document.getElementById("gasDemo"),
+      export: document.getElementById("gasExport"),
+      deviceState: document.getElementById("gasDeviceState"),
+      current: document.getElementById("gasCurrent"),
+      resistance: document.getElementById("gasResistance"),
+      response: document.getElementById("gasResponse"),
+      concentration: document.getElementById("gasConcentration"),
+      bias: document.getElementById("gasBias"),
+      power: document.getElementById("gasPower"),
+      quality: document.getElementById("gasQuality"),
+      zeroUv: document.getElementById("gasZeroUv"),
+      rfOhm: document.getElementById("gasRfOhm"),
+      ppmSlope: document.getElementById("gasPpmSlope"),
+      ppmOffset: document.getElementById("gasPpmOffset"),
+      applyCal: document.getElementById("gasApplyCal"),
+      saveModel: document.getElementById("gasSaveModel"),
+      forceNode: document.getElementById("gasForceNode"),
+      pathCurrent: document.getElementById("gasPathCurrent"),
+      tiaNode: document.getElementById("gasTiaNode"),
+      firmware: document.getElementById("gasFirmware"),
+      log: document.getElementById("gasLog"),
+      dot: document.getElementById("gasDot"),
+      portText: document.getElementById("gasPortText"),
+      lastFrame: document.getElementById("gasLastFrame"),
+    };
+
+    let port = null;
+    let reader = null;
+    let keepReading = false;
+    let rxBuffer = "";
+    let activeTransport = null;
+    let bleDevice = null;
+    let bleServer = null;
+    let bleWriteCharacteristic = null;
+    let bleNotifyCharacteristic = null;
+    let bleConnectedAtMs = 0;
+    let bleNotificationCount = 0;
+    let bleNotificationBytes = 0;
+    let bleManualDisconnect = false;
+    let bleReconnectTimer = null;
+    let bleReconnectAttempt = 0;
+    let bleReconnectInProgress = false;
+    let bleUnstableDisconnects = 0;
+    const bleTextDecoder = new TextDecoder();
+    const BLE_SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
+    const BLE_WRITE_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    const BLE_NOTIFY_UUID = "0000ffe2-0000-1000-8000-00805f9b34fb";
+    const BLE_WRITE_CHUNK_BYTES = 20;
+    const gasRecoveryPolicy = window.GasRecoveryPolicy;
+    if (!gasRecoveryPolicy) throw new Error("gas_recovery_policy.js 加载失败");
+    let points = [];
+    let savedCurves = [];
+    let isScanning = false;
+    let isPaused = false;
+    let repeatState = null;
+    let hoverPoint = null;
+    let lastPlotState = null;
+    let testMode = "transfer";
+    let activeRunMode = "transfer";
+    let analysisMode = false;
+    let gmViewEnabled = false;
+    const yAxisDrafts = {
+      ids: { min: "", max: "" },
+      gm: { min: "", max: "" },
+    };
+    let viewedHistoryCurveIndex = null;
+    let pendingQuality = null;
+    let referenceCurveId = null;
+    let activeMeasurementGroupId = null;
+    let nextCurveId = 1;
+    let nextMeasurementGroupId = 1;
+    let itTimer = { durationMs: 0, elapsedMs: 0, state: "idle" };
+    const CURVE_BREAK_MV = 20;
+  const TIA_RESISTOR_OHM = 51; // 实际安装的 TIA 采样/反馈电阻
+    const curveColors = ["#4dd9d2", "#ffb454", "#a78bfa", "#ff7b72", "#60a5fa", "#f472b6", "#a3e635", "#facc15"];
+    const SESSION_KEY = "egfet-plotter-session-v2";
+    const GAS_MODEL_KEY = "gas-sensor-concentration-model-v1";
+    const GAS_MAX_POINTS = 100000;
+    let activeWorkspace = "egfet";
+    let gasPoints = [];
+    let gasMarkers = [];
+    let gasLatest = null;
+    let gasRunning = false;
+    let gasDeviceState = "OFF";
+    let gasBaselineCurrentUa = null;
+    let gasBaselineResistanceMohm = null;
+    let gasTimeOffsetMs = 0;
+    let gasExpectNewRun = false;
+    let gasLastSequence = null;
+    let gasDrawQueued = false;
+    let gasLastInfoUptimeMs = null;
+    let gasLastInfoReceivedAtMs = null;
+    let gasHandshakeComplete = false;
+    let gasAfeReady = false;
+    const gasHandshakeWaiters = new Set();
+    let gasStartCommandPending = false;
+    let gasStartCommandTimer = null;
+    let gasStartGuardUntilMs = 0;
+    let gasStartGuardTimer = null;
+    let gasLastVbusMv = 0;
+    const HELP_DEFINITIONS = {
+      scanStart: ["起始 Vgs", "转移曲线扫描开始时施加的栅源电压。它与 Vgs 偏移相加后必须处于设备允许的 DAC 输出范围内。"],
+      scanEnd: ["结束 Vgs", "转移曲线扫描结束时的栅源电压。起始值高于结束值时可执行反向扫描，用于观察迟滞。"],
+      scanRate: ["扫描速率", "Vgs 每秒变化的毫伏数。速率过快可能增加滞后和采样不足；过慢则更容易受到长期漂移影响。"],
+      scanOffset: ["Vgs 偏移", "对整段扫描电压统一增加或减少的校准值，用于修正外部参考、DAC零点或实验基线。"],
+      itVgs: ["IT 固定 Vgs", "IT 模式下保持不变的栅源电压。应选在器件稳定、对目标变化有足够响应的工作区。"],
+      itDuration: ["IT 采集时间", "固定 Vgs 下连续记录 Ids 的总时长。较长记录有利于分析慢漂和 Allan deviation。"],
+      itInterval: ["采样间隔", "相邻样本之间的时间。它决定采样率和可分析的最高频率；频谱最高有效频率约为采样率的一半。"],
+      itSettle: ["稳定时间", "施加固定 Vgs 后、正式记录前的等待时间，用于让模拟前端和电化学界面进入相对稳定状态。"],
+      vdsMv: ["Vds（VA）", "漏源偏置电压。它影响器件工作区、跨导和电流大小；比较不同曲线时应保持一致。"],
+      repeatCount: ["重复次数", "自动重复执行同一组测量的次数。重复曲线可用于计算重复性并识别偶发异常。"],
+      repeatInterval: ["重复间隔", "两次自动测试之间的等待时间，让传感器、溶液和模拟前端有时间恢复。"],
+      baud: ["串口波特率", "电脑与 STM32 串口通信速度。必须与固件配置一致；当前工程默认使用 115200、8N1。"],
+      fixedIdsEnable: ["固定电流阈值", "启用后，在指定 Ids 处插值计算对应 Vgs，适合比较参考曲线与样品曲线的电压漂移。"],
+      fixedIds: ["固定 Ids", "用于恒流法比较的目标漏极电流。目标值必须位于被比较曲线实际经过的电流范围内。"],
+      smoothEnable: ["显示平滑", "只平滑屏幕显示，不修改导出的原始数据。转移曲线采用局部平滑，IT 曲线使用中值与指数平滑。"],
+      smoothWindow: ["平滑窗口", "参与显示平滑的相邻点数，自动调整为奇数。窗口越大越平滑，但可能削弱真实的快速变化。"],
+      xmin: ["横轴最小值", "手动固定图表横轴下限；留空时根据当前可见数据自动计算。"],
+      xmax: ["横轴最大值", "手动固定图表横轴上限；留空时根据当前可见数据自动计算。"],
+      ymin: ["纵轴最小值", "手动固定 Ids 显示下限。仅影响绘图范围，不会裁剪或修改原始数据。"],
+      ymax: ["纵轴最大值", "手动固定 Ids 显示上限。比较多组曲线时固定纵轴有助于避免视觉比例误判。"],
+      advancedLabel1: ["高级指标一", "转移曲线显示局部最大跨导附近线性外推得到的 Vth；IT 曲线显示不同平均时间下的最小 Allan deviation。"],
+      advancedLabel2: ["高级指标二", "转移曲线显示最大跨导 gm；IT 曲线显示 Allan deviation 最小时对应的建议平均时间。"],
+      advancedLabel3: ["高级指标三", "转移曲线显示局部线性拟合 R²；IT 曲线显示整段数据的线性漂移率。"],
+      dftSource: ["噪声数据源", "选择当前采集数据或历史曲线进行 Welch 功率谱密度估计。IT 曲线通常比扫描中的转移曲线更适合噪声分析。"]
+    };
+
+    let activeHelpButton = null;
+
+    function closeParameterHelp() {
+      if (activeHelpButton) activeHelpButton.setAttribute("aria-expanded", "false");
+      activeHelpButton = null;
+      els.helpPopover.classList.remove("show");
+    }
+
+    function openParameterHelp(button, target, definition) {
+      if (activeHelpButton === button && els.helpPopover.classList.contains("show")) {
+        closeParameterHelp();
+        return;
+      }
+      closeParameterHelp();
+      activeHelpButton = button;
+      button.setAttribute("aria-expanded", "true");
+      els.helpTitle.textContent = definition[0];
+      els.helpText.textContent = definition[1];
+      els.helpPopover.classList.add("show");
+      const rect = button.getBoundingClientRect();
+      const popRect = els.helpPopover.getBoundingClientRect();
+      const left = Math.max(12, Math.min(window.innerWidth - popRect.width - 12, rect.left + rect.width / 2 - popRect.width / 2));
+      const below = rect.bottom + 9;
+      const top = below + popRect.height <= window.innerHeight - 12 ? below : Math.max(12, rect.top - popRect.height - 9);
+      els.helpPopover.style.left = `${left}px`;
+      els.helpPopover.style.top = `${top}px`;
+      void target;
+    }
+
+    function initParameterHelp() {
+      for (const [id, definition] of Object.entries(HELP_DEFINITIONS)) {
+        const target = document.getElementById(id);
+        if (!target) continue;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "help-button";
+        button.textContent = "?";
+        button.setAttribute("aria-label", `解释${definition[0]}`);
+        button.setAttribute("aria-expanded", "false");
+        const label = target.closest("label");
+        if (label) {
+          const caption = document.createElement("span");
+          caption.className = "label-copy";
+          const captionText = label.querySelector(":scope > .label-text") || document.createElement("span");
+          if (!captionText.textContent.trim()) {
+            captionText.textContent = Array.from(label.childNodes)
+              .filter(node => node.nodeType === Node.TEXT_NODE)
+              .map(node => node.textContent.trim())
+              .filter(Boolean)
+              .join(" ");
+          }
+          Array.from(label.childNodes)
+            .filter(node => node.nodeType === Node.TEXT_NODE)
+            .forEach(node => node.remove());
+          caption.append(captionText, button);
+          label.insertBefore(caption, target);
+        } else {
+          const metricLabel = document.createElement("span");
+          metricLabel.className = "metric-label";
+          target.parentNode.insertBefore(metricLabel, target);
+          metricLabel.append(target, button);
+        }
+        button.addEventListener("click", event => {
+          event.preventDefault();
+          event.stopPropagation();
+          openParameterHelp(button, target, definition);
+        });
+      }
+      document.addEventListener("click", event => {
+        if (!els.helpPopover.contains(event.target)) closeParameterHelp();
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeParameterHelp();
+      });
+      window.addEventListener("resize", closeParameterHelp);
+      window.addEventListener("scroll", closeParameterHelp, true);
+    }
+
+    function showToast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+
+    function saveSession() {
+      const state = { savedCurves, referenceCurveId, testMode, savedAt: new Date().toISOString() };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(state));
+      showToast(`已保存 ${savedCurves.length} 条曲线到本机`);
+    }
+
+    function restoreSession() {
+      try {
+        const state = JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+        if (!state || !Array.isArray(state.savedCurves)) return;
+        savedCurves = state.savedCurves;
+        referenceCurveId = state.referenceCurveId || null;
+        renderCurveList();
+        updateStats();
+        draw();
+        showToast(`已恢复上次会话（${savedCurves.length} 条曲线）`);
+      } catch (err) {
+        appendLog(`恢复会话失败: ${err.message}`);
+      }
+    }
+
+    function loadDemoData() {
+      if (isScanning) return showToast("请先停止当前测试");
+      const makeCurve = (shift, n) => ({
+        id: allocateCurveId(), name: `Transfer Line ${n}`, mode: "transfer",
+        color: curveColors[(n - 1) % curveColors.length],
+        points: Array.from({ length: 76 }, (_, i) => {
+          const x = i * 20;
+          const threshold = 660 + shift;
+          const y = Math.max(0, Math.pow(Math.max(0, x - threshold), 1.34) / 64) + Math.sin(i * .55) * .35;
+          return { x, y, mode: "transfer", t: Date.now() + i };
+        })
+      });
+      savedCurves = [makeCurve(0, 1), makeCurve(34, 2), makeCurve(58, 3)];
+      points = [];
+      referenceCurveId = savedCurves[0].id;
+      renderCurveList();
+      els.curveSelect.value = "-1";
+      updateStats();
+      draw();
+      showToast("已载入 3 条 EGFET 演示曲线");
+    }
+
+    function allocateCurveId() {
+      return `curve-${Date.now()}-${nextCurveId++}`;
+    }
+
+    function allocateMeasurementGroupId() {
+      return `measurement-${Date.now()}-${nextMeasurementGroupId++}`;
+    }
+
+    function adcMvToIdsUa(adcMv) {
+      return adcMv * 1000 / TIA_RESISTOR_OHM;
+    }
+
+    function adcUvToIdsUa(adcUv) {
+      return adcUv / TIA_RESISTOR_OHM;
+    }
+
+    function formatItTime(milliseconds, roundUp = false) {
+      const safeMs = Math.max(0, Number(milliseconds) || 0);
+      const totalSeconds = roundUp ? Math.ceil(safeMs / 1000) : Math.floor(safeMs / 1000);
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      const mmss = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      return hours > 0 ? `${String(hours).padStart(2, "0")}:${mmss}` : mmss;
+    }
+
+    function renderItTimer() {
+      els.itTimeMarker.hidden = analysisMode || activeRunMode !== "it";
+      const durationMs = Math.max(0, itTimer.durationMs);
+      const elapsedMs = Math.min(durationMs || itTimer.elapsedMs, Math.max(0, itTimer.elapsedMs));
+      const remainingMs = Math.max(0, durationMs - elapsedMs);
+      const labels = {
+        idle: "待开始",
+        waiting: "等待采样",
+        running: "采集中",
+        paused: "已暂停",
+        done: "已完成",
+        stopped: "已停止",
+        error: "异常结束",
+        disconnected: "连接中断",
+      };
+      els.itTimeMarker.dataset.state = itTimer.state;
+      els.itTimeState.textContent = labels[itTimer.state] || labels.idle;
+      els.itElapsed.textContent = formatItTime(elapsedMs);
+      els.itRemaining.textContent = durationMs ? formatItTime(remainingMs, true) : "--:--";
+      els.itTimeProgress.style.width = durationMs ? `${Math.min(100, elapsedMs / durationMs * 100).toFixed(2)}%` : "0%";
+    }
+
+    function prepareItTimer(durationSeconds) {
+      itTimer = {
+        durationMs: Math.max(0, Number(durationSeconds) || 0) * 1000,
+        elapsedMs: 0,
+        state: "waiting",
+      };
+      renderItTimer();
+    }
+
+    function syncItTimer(rawTimeMs) {
+      if (activeRunMode !== "it") return;
+      const deviceElapsedMs = Math.max(0, Number(rawTimeMs) || 0);
+      itTimer.elapsedMs = Math.max(itTimer.elapsedMs, deviceElapsedMs);
+      if (itTimer.durationMs > 0) {
+        itTimer.elapsedMs = Math.min(itTimer.elapsedMs, itTimer.durationMs);
+      }
+      if (!isPaused && itTimer.state !== "stopped") itTimer.state = "running";
+      renderItTimer();
+    }
+
+    function finishItTimer() {
+      if (activeRunMode !== "it") return;
+      if (itTimer.state !== "stopped") {
+        itTimer.elapsedMs = itTimer.durationMs || itTimer.elapsedMs;
+        itTimer.state = "done";
+      }
+      renderItTimer();
+    }
+
+    function updateItTimerState(state) {
+      if (activeRunMode !== "it") return;
+      itTimer.state = state;
+      renderItTimer();
+    }
+
+    function setMode(mode) {
+      if (mode === "dft") {
+        if (gmViewEnabled) setGmView(false);
+        analysisMode = true;
+        els.app.classList.add("analysis");
+        els.modeTransfer.classList.remove("active");
+        els.modeIT.classList.remove("active");
+        els.modeDFT.classList.add("active");
+        els.transferParams.style.display = "none";
+        els.itParams.style.display = "none";
+        els.startScan.disabled = true;
+        renderItTimer();
+        updateDftAnalysis();
+        return;
+      }
+
+      if (testMode === mode && !analysisMode) return;
+
+      if (isScanning) {
+        appendLog("测试进行中不能切换功能模式，请先暂停或停止当前测试");
+        return;
+      }
+
+      viewedHistoryCurveIndex = null;
+      if (points.length > 0) {
+        saveCurrentCurve(true);
+      }
+
+      testMode = mode;
+      activeRunMode = mode;
+      if (mode !== "transfer" && gmViewEnabled) setGmView(false);
+      analysisMode = false;
+      hoverPoint = null;
+      els.app.classList.remove("analysis");
+      els.modeTransfer.classList.toggle("active", mode === "transfer");
+      els.modeIT.classList.toggle("active", mode === "it");
+      els.modeDFT.classList.remove("active");
+      els.transferParams.style.display = mode === "transfer" ? "inline-flex" : "none";
+      els.itParams.style.display = mode === "it" ? "inline-flex" : "none";
+      els.startScan.disabled = !port || isScanning;
+      if (mode === "it" && itTimer.state === "idle") {
+        itTimer.durationMs = Math.max(0, Number(els.itDuration.value) || 0) * 1000;
+      }
+      renderItTimer();
+      updateGmViewUi();
+      updateStats();
+      draw();
+    }
+
+    function xAxisLabel() {
+      return activeRunMode === "it" ? "Time / s" : "Vgs / mV";
+    }
+
+    function updateGmViewUi() {
+      const active = gmViewEnabled && activeRunMode === "transfer";
+      els.app.classList.toggle("gm-view", active);
+      els.toggleGmCurve.classList.toggle("active", active);
+      els.toggleGmCurve.textContent = active ? "返回 Ids 曲线" : "查看跨导曲线";
+      els.toggleGmCurve.disabled = activeRunMode !== "transfer" || analysisMode;
+      els.plotSignalLabel.textContent = active ? "gm" : "Ids";
+      els.yminLabel.textContent = active ? "纵轴最小 mS" : "纵轴最小 uA";
+      els.ymaxLabel.textContent = active ? "纵轴最大 mS" : "纵轴最大 uA";
+    }
+
+    function setGmView(enabled) {
+      const currentKey = gmViewEnabled ? "gm" : "ids";
+      yAxisDrafts[currentKey] = { min: els.ymin.value, max: els.ymax.value };
+      gmViewEnabled = Boolean(enabled) && activeRunMode === "transfer";
+      const nextKey = gmViewEnabled ? "gm" : "ids";
+      els.ymin.value = yAxisDrafts[nextKey].min;
+      els.ymax.value = yAxisDrafts[nextKey].max;
+      hoverPoint = null;
+      updateGmViewUi();
+    }
+
+    function isSerialConnected() {
+      return activeTransport === "serial" && Boolean(port && port.readable && port.writable);
+    }
+
+    function isBluetoothConnected() {
+      return activeTransport === "bluetooth" && Boolean(
+        bleDevice?.gatt?.connected && bleWriteCharacteristic && bleNotifyCharacteristic
+      );
+    }
+
+    function isDeviceConnected() {
+      return isSerialConnected() || isBluetoothConnected();
+    }
+
+    function selectedGasTransport() {
+      return gasEls.transport.value === "serial" ? "serial" : "bluetooth";
+    }
+
+    function updateGasTransportChoiceUi() {
+      const mode = activeTransport || selectedGasTransport();
+      const connected = isDeviceConnected();
+      gasEls.baudGroup.hidden = mode !== "serial";
+      gasEls.linkProtocol.textContent = mode === "bluetooth"
+        ? "FFE0 · TX FFE1 · RX FFE2"
+        : "USART2 · 115200 · 8N1";
+      gasEls.linkProtocol.classList.toggle("serial", mode === "serial");
+      if (!connected) {
+        gasEls.connect.textContent = mode === "bluetooth"
+          ? (bleDevice ? "重新连接蓝牙" : "连接蓝牙")
+          : "连接串口";
+      }
+    }
+
+    function setState(text, connected) {
+      const serialConnected = connected && activeTransport === "serial";
+      els.state.textContent = text;
+      els.dot.classList.toggle("on", serialConnected);
+      els.portText.textContent = serialConnected
+        ? "串口已连接"
+        : connected
+          ? "BLE 已连接 · 气体工作区可用"
+          : "等待连接";
+      els.connect.disabled = connected;
+      els.disconnect.disabled = !connected;
+      els.startScan.disabled = !serialConnected || isScanning || analysisMode;
+      els.pauseTest.disabled = true;
+      els.stopTest.disabled = true;
+      if (!connected && gasRunning) {
+        gasRunning = false;
+        gasDeviceState = "DISCONNECTED";
+        gasEls.workspace.dataset.running = "false";
+        gasEls.deviceState.textContent = gasDeviceState;
+        gasEls.deviceState.classList.remove("running");
+        gasEls.deviceState.classList.add("alarm");
+      }
+      gasUpdateConnectionUi(connected);
+    }
+
+    function setScanning(scanning) {
+      isScanning = scanning;
+      if (isSerialConnected()) {
+        els.state.textContent = scanning ? (isPaused ? "已暂停" : "测试中") : "已连接";
+        els.startScan.disabled = scanning || analysisMode;
+        els.pauseTest.disabled = !scanning;
+        els.stopTest.disabled = !scanning;
+      }
+    }
+
+    function setPaused(paused) {
+      isPaused = paused;
+      els.pauseTest.textContent = paused ? "▶ 继续" : "Ⅱ 暂停";
+      if (isSerialConnected() && isScanning) {
+        els.state.textContent = paused ? "已暂停" : "测试中";
+        if (activeRunMode === "it") {
+          updateItTimerState(paused ? "paused" : "running");
+        }
+      }
+    }
+
+    function cancelRepeat() {
+      if (repeatState && repeatState.timer) {
+        clearTimeout(repeatState.timer);
+      }
+      repeatState = null;
+      if (isSerialConnected() && !isScanning) {
+        els.state.textContent = "已连接";
+        els.startScan.disabled = analysisMode;
+      }
+    }
+
+    function appendLog(text) {
+      const line = text.trim();
+      if (!line) return;
+      els.log.textContent += line + "\n";
+      const maxLen = 12000;
+      if (els.log.textContent.length > maxLen) {
+        els.log.textContent = els.log.textContent.slice(-maxLen);
+      }
+      els.log.scrollTop = els.log.scrollHeight;
+    }
+
+    function gasAppendLog(text) {
+      const line = String(text || "").trim();
+      if (!line) return;
+      if (gasEls.log.textContent.trim() === "等待设备连接…") gasEls.log.textContent = "";
+      const stamp = new Date().toLocaleTimeString("zh-CN", { hour12: false });
+      gasEls.log.textContent += `[${stamp}] ${line}\n`;
+      if (gasEls.log.textContent.length > 10000) {
+        gasEls.log.textContent = gasEls.log.textContent.slice(-10000);
+      }
+      gasEls.log.scrollTop = gasEls.log.scrollHeight;
+    }
+
+    function gasResetHandshake() {
+      gasHandshakeComplete = false;
+      gasAfeReady = false;
+      for (const waiter of gasHandshakeWaiters) {
+        clearTimeout(waiter.timer);
+        waiter.resolve(false);
+      }
+      gasHandshakeWaiters.clear();
+      gasUpdateConnectionUi(isDeviceConnected());
+    }
+
+    function gasMarkHandshakeComplete(source) {
+      const firstResponse = !gasHandshakeComplete;
+      gasHandshakeComplete = true;
+      for (const waiter of gasHandshakeWaiters) {
+        clearTimeout(waiter.timer);
+        waiter.resolve(true);
+      }
+      gasHandshakeWaiters.clear();
+      gasUpdateConnectionUi(isDeviceConnected());
+      if (firstResponse) gasAppendLog(`STM32握手成功 · ${source}`);
+    }
+
+    function gasWaitForHandshake(timeoutMs) {
+      if (gasHandshakeComplete) return Promise.resolve(true);
+      return new Promise(resolve => {
+        const waiter = { resolve, timer: null };
+        waiter.timer = setTimeout(() => {
+          gasHandshakeWaiters.delete(waiter);
+          resolve(false);
+        }, timeoutMs);
+        gasHandshakeWaiters.add(waiter);
+      });
+    }
+
+    async function gasPerformHandshake(context) {
+      gasResetHandshake();
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        gasAppendLog(`TX GAS,HELLO · ${context}握手 ${attempt}/3`);
+        await sendDeviceLine("GAS,HELLO");
+        if (await gasWaitForHandshake(1200)) {
+          await new Promise(resolve => setTimeout(resolve, 180));
+          gasAppendLog("TX GAS,STATUS · 握手完成后读取状态");
+          await sendDeviceLine("GAS,STATUS");
+          return true;
+        }
+      }
+      gasAppendLog("STM32握手失败 · GATT已连接但FFE2没有收到ACK/INFO/STATUS");
+      showToast("蓝牙模块已连接，但STM32没有响应");
+      gasUpdateConnectionUi(isDeviceConnected());
+      return false;
+    }
+
+    function gasSetStartCommandPending(pending) {
+      gasStartCommandPending = Boolean(pending);
+      if (gasStartCommandTimer) clearTimeout(gasStartCommandTimer);
+      gasStartCommandTimer = null;
+      if (gasStartCommandPending) {
+        gasStartCommandTimer = setTimeout(() => {
+          gasStartCommandTimer = null;
+          gasStartCommandPending = false;
+          gasUpdateConnectionUi(isDeviceConnected());
+          gasAppendLog("启动确认超时 · 未收到ACK/STATE，请勿重复点击，先读取状态");
+        }, 5000);
+      }
+      gasUpdateConnectionUi(isDeviceConnected());
+    }
+
+    function gasStartGuardRemainingMs() {
+      return Math.max(0, gasStartGuardUntilMs - Date.now());
+    }
+
+    function gasSetStartGuard(durationMs, reason) {
+      const duration = Math.max(0, Math.round(Number(durationMs) || 0));
+      if (duration === 0) return;
+      const previousDeadline = gasStartGuardUntilMs;
+      gasStartGuardUntilMs = Math.max(gasStartGuardUntilMs, Date.now() + duration);
+      if (gasStartGuardTimer) clearTimeout(gasStartGuardTimer);
+      gasStartGuardTimer = setTimeout(() => {
+        gasStartGuardTimer = null;
+        gasUpdateConnectionUi(isDeviceConnected());
+        gasAppendLog("电源稳定等待完成，可以手动开始采集");
+      }, gasStartGuardRemainingMs() + 50);
+      gasUpdateConnectionUi(isDeviceConnected());
+      if (gasStartGuardUntilMs > previousDeadline + 250) {
+        gasAppendLog(`启动保护 ${Math.ceil(duration / 1000)} s · ${reason}`);
+      }
+    }
+
+    function setWorkspace(workspace) {
+      if (workspace === "gas" && isScanning) {
+        showToast("EGFET 测试进行中，请先停止后再切换");
+        return;
+      }
+      activeWorkspace = workspace === "gas" ? "gas" : "egfet";
+      els.app.classList.toggle("gas-mode", activeWorkspace === "gas");
+      if (activeWorkspace === "gas") {
+        requestAnimationFrame(() => {
+          gasScheduleDraw();
+          if (isDeviceConnected()) sendDeviceLine("GAS,HELLO").catch(err => gasAppendLog(`HELLO 失败: ${err.message}`));
+        });
+      } else {
+        requestAnimationFrame(draw);
+      }
+    }
+
+    function gasUpdateConnectionUi(connected) {
+      const mode = activeTransport || selectedGasTransport();
+      const startGuarded = gasStartGuardRemainingMs() > 0;
+      const reconnectBusy = mode === "bluetooth" &&
+        (bleReconnectInProgress || Boolean(bleReconnectTimer));
+      gasEls.connect.disabled = connected || reconnectBusy;
+      gasEls.disconnect.disabled = !connected;
+      gasEls.transport.disabled = connected;
+      gasEls.start.disabled = !connected || !gasHandshakeComplete || !gasAfeReady || gasRunning ||
+        gasStartCommandPending || startGuarded;
+      gasEls.stop.disabled = !connected || !gasRunning;
+      gasEls.status.disabled = !connected;
+      gasEls.applyCal.disabled = !connected || !gasHandshakeComplete;
+      gasEls.dot.classList.toggle("on", connected);
+      gasEls.portText.textContent = connected
+        ? mode === "bluetooth"
+          ? gasHandshakeComplete
+            ? `BLE/STM32 已握手 · ${bleDevice?.name || "VG6328A-Pro"}`
+            : `BLE 已连接 · 等待STM32响应`
+          : "串口已连接 · 115200 8N1"
+        : mode === "bluetooth"
+          ? "等待蓝牙连接"
+          : "等待串口连接";
+      updateGasTransportChoiceUi();
+    }
+
+    function gasSetDeviceState(state, reason = "") {
+      gasDeviceState = state || "UNKNOWN";
+      gasRunning = state === "RUNNING" || state === "WARMUP" || state === "ARMING";
+      gasEls.workspace.dataset.running = gasRunning ? "true" : "false";
+      gasEls.deviceState.textContent = gasDeviceState;
+      gasEls.deviceState.classList.toggle("running", gasRunning);
+      gasEls.deviceState.classList.toggle("alarm", state === "FAULT" || state === "LOW_BAT");
+      if (state === "ARMING" || state === "WARMUP" || state === "RUNNING") {
+        gasSetStartCommandPending(false);
+      }
+      gasUpdateConnectionUi(isDeviceConnected());
+      if (reason) gasAppendLog(`STATE ${gasDeviceState} · ${reason}`);
+    }
+
+    function gasResponseFor(point) {
+      if (!point || !Number.isFinite(gasBaselineCurrentUa) || Math.abs(gasBaselineCurrentUa) < 1e-12) {
+        return NaN;
+      }
+      return (point.currentUa - gasBaselineCurrentUa) / Math.abs(gasBaselineCurrentUa) * 100;
+    }
+
+    function gasConcentrationFor(point) {
+      const slopeText = gasEls.ppmSlope.value.trim();
+      const slope = slopeText === "" ? NaN : Number(slopeText);
+      const offset = Number(gasEls.ppmOffset.value || 0);
+      const response = gasResponseFor(point);
+      if (!Number.isFinite(slope) || !Number.isFinite(offset) || !Number.isFinite(response)) return NaN;
+      return offset + slope * response;
+    }
+
+    function gasRenderQuality(flags) {
+      const definitions = [
+        [0x0001, "ADC 饱和", "bad"],
+        [0x0002, "偏置异常", "bad"],
+        [0x0004, "超测量范围", "warn"],
+        [0x0008, "疑似开路", "warn"],
+        [0x0010, "电池偏低", "bad"],
+        [0x0020, "USB 供电", ""],
+        [0x0040, "充电中", ""],
+        [0x0080, "模拟预热", ""],
+        [0x0100, "VREF 无效", "bad"],
+        [0x0200, "主循环丢帧", "warn"],
+      ];
+      gasEls.quality.innerHTML = "";
+      let count = 0;
+      for (const [mask, label, kind] of definitions) {
+        if ((flags & mask) === 0) continue;
+        const chip = document.createElement("span");
+        chip.className = `gas-quality-chip ${kind}`.trim();
+        chip.textContent = label;
+        gasEls.quality.appendChild(chip);
+        count++;
+      }
+      if (count === 0) {
+        const chip = document.createElement("span");
+        chip.className = "gas-quality-chip";
+        chip.textContent = "信号质量正常";
+        gasEls.quality.appendChild(chip);
+      }
+    }
+
+    function gasUpdateMetrics() {
+      gasEls.pointCount.textContent = `${gasPoints.length.toLocaleString()} SAMPLES`;
+      gasEls.empty.hidden = gasPoints.length > 0;
+      if (!gasLatest) {
+        gasEls.current.innerHTML = `--<small>µA</small>`;
+        gasEls.resistance.innerHTML = `--<small>MΩ</small>`;
+        gasEls.response.innerHTML = `--<small>%</small>`;
+        gasEls.concentration.textContent = "未标定";
+        gasEls.bias.innerHTML = `--<small>V</small>`;
+        gasEls.power.textContent = "--";
+        return;
+      }
+
+      const response = gasResponseFor(gasLatest);
+      const concentration = gasConcentrationFor(gasLatest);
+      const resistanceMohm = gasLatest.resistanceOhm > 0 ? gasLatest.resistanceOhm / 1e6 : NaN;
+      gasEls.current.innerHTML = `${gasLatest.currentUa.toFixed(4)}<small>µA</small>`;
+      gasEls.resistance.innerHTML = `${Number.isFinite(resistanceMohm) ? resistanceMohm.toFixed(4) : "--"}<small>MΩ</small>`;
+      gasEls.response.innerHTML = `${Number.isFinite(response) ? response.toFixed(2) : "--"}<small>%</small>`;
+      gasEls.concentration.textContent = Number.isFinite(concentration) ? `${concentration.toFixed(2)} ppm` : "未标定";
+      gasEls.bias.innerHTML = `${(gasLatest.sensorUv / 1e6).toFixed(4)}<small>V</small>`;
+      gasEls.power.textContent = `${(gasLatest.batteryMv / 1000).toFixed(2)} V${gasLatest.vbusMv >= 4000 ? " · USB" : ""}`;
+      gasEls.forceNode.textContent = `${(gasLatest.vforceUv / 1e6).toFixed(4)} V`;
+      gasEls.pathCurrent.textContent = `${Math.abs(gasLatest.currentUa).toFixed(4)} µA ${gasLatest.currentUa >= 0 ? "→" : "←"}`;
+      gasEls.tiaNode.textContent = `${(gasLatest.tiaUv / 1e6).toFixed(4)} / ${(gasLatest.vcmUv / 1e6).toFixed(4)} V`;
+      gasRenderQuality(gasLatest.flags);
+    }
+
+    function gasParseInfo(parts) {
+      gasMarkHandshakeComplete("INFO");
+      const values = {};
+      for (const field of parts.slice(2)) {
+        const separator = field.indexOf("=");
+        if (separator > 0) values[field.slice(0, separator)] = field.slice(separator + 1);
+      }
+      if (values.fw) gasEls.firmware.textContent = `FW ${values.fw}`;
+      if (values.out_hz) gasEls.rate.value = values.out_hz;
+      if (values.rf_ohm) gasEls.rfOhm.value = values.rf_ohm;
+      if (values.zero_uV) gasEls.zeroUv.value = values.zero_uV;
+      gasAfeReady = values.afe_ready === undefined ? true : values.afe_ready === "1";
+      const infoReceivedAtMs = Date.now();
+      const elapsedSincePreviousInfoMs = gasLastInfoReceivedAtMs === null
+        ? 0
+        : infoReceivedAtMs - gasLastInfoReceivedAtMs;
+      const assessment = gasRecoveryPolicy.assessInfo(
+        values.reset || "UNKNOWN",
+        values.uptime_ms,
+        gasLastInfoUptimeMs,
+        elapsedSincePreviousInfoMs
+      );
+      const uptimeSeconds = assessment.uptimeMs !== null
+        ? `${(assessment.uptimeMs / 1000).toFixed(1)} s`
+        : "?";
+      gasAppendLog(`INFO protocol ${values.proto || "?"} · FW ${values.fw || "?"} · ${values.out_hz || "?"} Hz · reset ${values.reset || "?"} · uptime ${uptimeSeconds} · module logs ${values.ble_log || "0"}`);
+      if (!gasAfeReady) {
+        const initFault = values.init || "UNKNOWN";
+        gasSetDeviceState("FAULT", `INIT_${initFault}`);
+        gasAppendLog(`模拟采集初始化失败 · ${initFault} · 通信仍可诊断，禁止启动采集`);
+        showToast(`模拟前端初始化失败：${initFault}`);
+      }
+      if (assessment.restarted) {
+        gasMarkers.push({
+          timeMs: gasLatest?.timeMs || 0,
+          label: "POWER RESET",
+          color: "#d84c4c",
+        });
+        gasAppendLog(`检测到PCB重新启动 · 上次 uptime ${(gasLastInfoUptimeMs / 1000).toFixed(1)} s → 当前 ${uptimeSeconds}`);
+        showToast("检测到PCB发生电源复位；已暂缓采集启动");
+      }
+      if (assessment.guardMs > 0) {
+        gasSetStartGuard(assessment.guardMs, "POWER_BOR 后等待供电稳定");
+      }
+      if (assessment.uptimeMs !== null) gasLastInfoUptimeMs = assessment.uptimeMs;
+      gasLastInfoReceivedAtMs = infoReceivedAtMs;
+      gasScheduleDraw();
+    }
+
+    function parseGasLine(text) {
+      const parts = text.split(",").map(part => part.trim());
+      const type = parts[1] || "";
+
+      if (type === "INFO") {
+        gasParseInfo(parts);
+        return;
+      }
+
+      if (type === "STATE") {
+        gasSetDeviceState(parts[2] || "UNKNOWN", parts.slice(3).join(","));
+        return;
+      }
+
+      if (type === "S") {
+        gasMarkHandshakeComplete("STATUS");
+        const state = parts[2] || "UNKNOWN";
+        const flags = Number(parts[8]) || 0;
+        gasLastVbusMv = Number(parts[4]) || 0;
+        gasSetDeviceState(state);
+        gasEls.rate.value = parts[5] || gasEls.rate.value;
+        gasEls.rfOhm.value = parts[6] || gasEls.rfOhm.value;
+        gasEls.zeroUv.value = parts[7] || gasEls.zeroUv.value;
+        gasRenderQuality(flags);
+        gasAppendLog(`STATUS ${state} · BAT ${parts[3] || "?"} mV · VBUS ${parts[4] || "?"} mV · dropped ${parts[9] || "0"} · module logs ${parts[10] || "0"}`);
+        return;
+      }
+
+      if (type === "ACK") {
+        if (parts[2] === "HELLO") gasMarkHandshakeComplete("ACK,HELLO");
+        if (parts[2] === "START") gasSetStartCommandPending(false);
+        if (parts[2] === "RATE" && parts[3]) gasEls.rate.value = parts[3];
+        if (parts[2] === "CAL") {
+          if (parts[3]) gasEls.zeroUv.value = parts[3];
+          if (parts[4]) gasEls.rfOhm.value = parts[4];
+        }
+        gasAppendLog(text);
+        return;
+      }
+
+      if (type === "ERR") {
+        gasAppendLog(`设备拒绝命令：${parts.slice(2).join(" · ")}`);
+        showToast(`气体设备错误：${parts.slice(2).join(" ")}`);
+        return;
+      }
+
+      if (type === "FAULT") {
+        gasAfeReady = false;
+        const fault = parts.slice(2).join(" · ") || "UNKNOWN";
+        gasSetDeviceState("FAULT", fault);
+        gasAppendLog(`设备初始化故障：${fault}`);
+        showToast(`设备初始化故障：${fault}`);
+        return;
+      }
+
+      if (type !== "D" || parts.length < 19) {
+        gasAppendLog(text);
+        return;
+      }
+
+      const seq = Number(parts[2]);
+      const deviceTimeMs = Number(parts[3]);
+      const currentNa = Number(parts[4]);
+      const resistanceOhm = Number(parts[5]);
+      const sensorUv = Number(parts[6]);
+      const tiaUv = Number(parts[7]);
+      const vcmUv = Number(parts[8]);
+      const vforceUv = Number(parts[9]);
+      const batteryMv = Number(parts[10]);
+      const vbusMv = Number(parts[11]);
+      const flags = Number(parts[12]);
+      const raw = parts.slice(13, 19).map(Number);
+      const required = [seq, deviceTimeMs, currentNa, resistanceOhm, sensorUv, tiaUv, vcmUv, vforceUv, batteryMv, vbusMv, flags, ...raw];
+      if (!required.every(Number.isFinite)) {
+        gasAppendLog(`丢弃格式错误的数据帧：${text}`);
+        return;
+      }
+
+      if (gasPoints.length === 0) {
+        gasTimeOffsetMs = 0;
+      } else if (gasExpectNewRun || (gasLastSequence !== null && seq <= gasLastSequence)) {
+        gasTimeOffsetMs = gasPoints[gasPoints.length - 1].timeMs + 1000 - deviceTimeMs;
+        gasMarkers.push({ timeMs: deviceTimeMs + gasTimeOffsetMs, label: "NEW RUN", color: "#0e8e8c" });
+        gasExpectNewRun = false;
+      }
+
+      const point = {
+        seq,
+        deviceTimeMs,
+        timeMs: deviceTimeMs + gasTimeOffsetMs,
+        currentNa,
+        currentUa: currentNa / 1000,
+        resistanceOhm,
+        sensorUv,
+        tiaUv,
+        vcmUv,
+        vforceUv,
+        batteryMv,
+        vbusMv,
+        flags,
+        raw,
+        receivedAt: Date.now(),
+      };
+      gasPoints.push(point);
+      if (gasPoints.length > GAS_MAX_POINTS) {
+        gasPoints.splice(0, gasPoints.length - GAS_MAX_POINTS);
+      }
+      gasLastSequence = seq;
+      gasLastVbusMv = vbusMv;
+      gasLatest = point;
+      if (gasDeviceState !== "RUNNING") gasSetDeviceState("RUNNING");
+      gasEls.lastFrame.textContent = `LAST FRAME #${seq} · ${(point.timeMs / 1000).toFixed(1)} s`;
+      gasUpdateMetrics();
+      gasScheduleDraw();
+    }
+
+    function gasScheduleDraw() {
+      if (gasDrawQueued) return;
+      gasDrawQueued = true;
+      requestAnimationFrame(() => {
+        gasDrawQueued = false;
+        gasDraw();
+      });
+    }
+
+    function gasMetricValue(point) {
+      if (gasEls.metric.value === "resistance") {
+        return point.resistanceOhm > 0 ? point.resistanceOhm / 1e6 : NaN;
+      }
+      if (gasEls.metric.value === "response") return gasResponseFor(point);
+      return point.currentUa;
+    }
+
+    function gasMetricLabel() {
+      if (gasEls.metric.value === "resistance") return "Resistance / MΩ";
+      if (gasEls.metric.value === "response") return "Response ΔI/I₀ / %";
+      return "Current / µA";
+    }
+
+    function gasDraw() {
+      if (activeWorkspace !== "gas") return;
+      const canvas = gasEls.plot;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (width < 40 || height < 40) return;
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+
+      const plot = { left: 66, top: 28, right: 22, bottom: 52 };
+      plot.width = Math.max(1, width - plot.left - plot.right);
+      plot.height = Math.max(1, height - plot.top - plot.bottom);
+      ctx.fillStyle = "#fffefb";
+      ctx.fillRect(0, 0, width, height);
+
+      const source = gasPoints.slice(-3000);
+      let series = source
+        .map(point => ({ point, x: point.timeMs / 1000, y: gasMetricValue(point) }))
+        .filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
+
+      if (gasEls.smooth.checked && series.length >= 5) {
+        series = series.map((item, index, all) => {
+          const from = Math.max(0, index - 2);
+          const to = Math.min(all.length, index + 3);
+          const y = all.slice(from, to).reduce((sum, entry) => sum + entry.y, 0) / (to - from);
+          return { ...item, y };
+        });
+      }
+
+      if (series.length === 0) {
+        ctx.fillStyle = "#789095";
+        ctx.font = "12px Consolas, monospace";
+        const message = gasEls.metric.value === "response" && gasPoints.length ? "请先点击“记录基线”" : "NO DATA";
+        ctx.fillText(message, plot.left + 12, plot.top + 22);
+        return;
+      }
+
+      let xMin = series[0].x;
+      let xMax = series[series.length - 1].x;
+      let yMin = Math.min(...series.map(item => item.y));
+      let yMax = Math.max(...series.map(item => item.y));
+      if (xMax <= xMin) xMax = xMin + 1;
+      if (yMax <= yMin) {
+        const pad = Math.max(0.01, Math.abs(yMin) * 0.05);
+        yMin -= pad;
+        yMax += pad;
+      } else {
+        const pad = (yMax - yMin) * 0.1;
+        yMin -= pad;
+        yMax += pad;
+      }
+
+      const sx = value => plot.left + (value - xMin) / (xMax - xMin) * plot.width;
+      const sy = value => plot.top + plot.height - (value - yMin) / (yMax - yMin) * plot.height;
+
+      ctx.font = "10px Consolas, monospace";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 8; i++) {
+        const x = plot.left + plot.width * i / 8;
+        ctx.strokeStyle = i === 0 || i === 8 ? "#a9c1bd" : "#e1ebe8";
+        ctx.beginPath();
+        ctx.moveTo(x, plot.top);
+        ctx.lineTo(x, plot.top + plot.height);
+        ctx.stroke();
+        const value = xMin + (xMax - xMin) * i / 8;
+        ctx.fillStyle = "#6c8387";
+        ctx.fillText(value.toFixed(value < 100 ? 1 : 0), x - 10, plot.top + plot.height + 18);
+      }
+      for (let i = 0; i <= 6; i++) {
+        const y = plot.top + plot.height * i / 6;
+        ctx.strokeStyle = i === 0 || i === 6 ? "#a9c1bd" : "#e1ebe8";
+        ctx.beginPath();
+        ctx.moveTo(plot.left, y);
+        ctx.lineTo(plot.left + plot.width, y);
+        ctx.stroke();
+        const value = yMax - (yMax - yMin) * i / 6;
+        ctx.fillStyle = "#6c8387";
+        ctx.fillText(value.toFixed(Math.abs(value) < 10 ? 3 : 1), 8, y + 3);
+      }
+
+      for (const marker of gasMarkers) {
+        const markerX = marker.timeMs / 1000;
+        if (markerX < xMin || markerX > xMax) continue;
+        const x = sx(markerX);
+        ctx.save();
+        ctx.setLineDash([5, 4]);
+        ctx.strokeStyle = marker.color;
+        ctx.beginPath();
+        ctx.moveTo(x, plot.top);
+        ctx.lineTo(x, plot.top + plot.height);
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.translate(x + 4, plot.top + 8);
+        ctx.rotate(Math.PI / 2);
+        ctx.fillStyle = marker.color;
+        ctx.font = "700 9px Consolas, monospace";
+        ctx.fillText(marker.label, 0, 0);
+        ctx.restore();
+      }
+
+      const traceColor = gasEls.metric.value === "resistance" ? "#d88416" :
+        gasEls.metric.value === "response" ? "#c83d45" : "#0e8e8c";
+      ctx.strokeStyle = traceColor;
+      ctx.lineWidth = 1.7;
+      ctx.beginPath();
+      series.forEach((item, index) => {
+        const x = sx(item.x);
+        const y = sy(item.y);
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const last = series[series.length - 1];
+      ctx.fillStyle = traceColor;
+      ctx.beginPath();
+      ctx.arc(sx(last.x), sy(last.y), 3.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#87a8a4";
+      ctx.strokeRect(plot.left, plot.top, plot.width, plot.height);
+      ctx.fillStyle = "#49656a";
+      ctx.font = "11px Consolas, monospace";
+      ctx.fillText("Session time / s", plot.left + plot.width - 104, height - 13);
+      ctx.save();
+      ctx.translate(16, plot.top + plot.height / 2 + 56);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(gasMetricLabel(), 0, 0);
+      ctx.restore();
+    }
+
+    function gasMarkEvent(label, color) {
+      if (!gasLatest) {
+        showToast("还没有数据，无法标记事件");
+        return;
+      }
+      gasMarkers.push({ timeMs: gasLatest.timeMs, label, color });
+      gasAppendLog(`EVENT ${label} @ ${(gasLatest.timeMs / 1000).toFixed(2)} s`);
+      gasScheduleDraw();
+    }
+
+    function gasCaptureBaseline() {
+      if (gasPoints.length === 0) {
+        showToast("还没有数据，无法记录基线");
+        return;
+      }
+      const endTime = gasPoints[gasPoints.length - 1].timeMs;
+      const sample = gasPoints.filter(point => point.timeMs >= endTime - 3000);
+      gasBaselineCurrentUa = sample.reduce((sum, point) => sum + point.currentUa, 0) / sample.length;
+      const validResistance = sample.filter(point => point.resistanceOhm > 0);
+      gasBaselineResistanceMohm = validResistance.length
+        ? validResistance.reduce((sum, point) => sum + point.resistanceOhm / 1e6, 0) / validResistance.length
+        : null;
+      gasMarkers.push({ timeMs: endTime, label: "BASELINE", color: "#4f6c72" });
+      gasAppendLog(`BASELINE I₀=${gasBaselineCurrentUa.toFixed(5)} µA · ${sample.length} points`);
+      gasUpdateMetrics();
+      gasScheduleDraw();
+    }
+
+    function gasClearData() {
+      gasPoints = [];
+      gasMarkers = [];
+      gasLatest = null;
+      gasLastSequence = null;
+      gasTimeOffsetMs = 0;
+      gasBaselineCurrentUa = null;
+      gasBaselineResistanceMohm = null;
+      gasEls.lastFrame.textContent = "LAST FRAME --";
+      gasUpdateMetrics();
+      gasScheduleDraw();
+      gasAppendLog("本地曲线已清空，设备状态未改变");
+    }
+
+    function gasCalibrationValues() {
+      const zeroUv = Math.round(Number(gasEls.zeroUv.value));
+      const rfOhm = Math.round(Number(gasEls.rfOhm.value));
+      if (!Number.isFinite(zeroUv) || zeroUv < -500000 || zeroUv > 500000) {
+        throw new Error("零点必须在 -500000~500000 µV");
+      }
+      if (!Number.isFinite(rfOhm) || rfOhm < 1000 || rfOhm > 10000000) {
+        throw new Error("Rf 必须在 1000~10000000 Ω");
+      }
+      return { zeroUv, rfOhm };
+    }
+
+    async function gasApplyCalibration() {
+      const { zeroUv, rfOhm } = gasCalibrationValues();
+      const command = `GAS,CAL,${zeroUv},${rfOhm}`;
+      gasAppendLog(`TX ${command}`);
+      await sendDeviceLine(command);
+    }
+
+    async function gasStartAcquisition() {
+      if (!gasHandshakeComplete) {
+        throw new Error("STM32尚未握手，不能发送启动命令");
+      }
+      if (!gasAfeReady) {
+        throw new Error("模拟采集前端未就绪，请先查看INIT故障信息");
+      }
+      if (gasStartCommandPending) {
+        throw new Error("启动命令正在等待设备确认，请勿重复点击");
+      }
+      const { zeroUv, rfOhm } = gasCalibrationValues();
+      const remainingGuardMs = gasStartGuardRemainingMs();
+      if (remainingGuardMs > 0) {
+        throw new Error(`电源稳定保护中，请等待 ${Math.ceil(remainingGuardMs / 1000)} 秒`);
+      }
+      let rate = Math.round(Number(gasEls.rate.value));
+      if (!Number.isFinite(rate) || rate < 1 || rate > 20) {
+        throw new Error("输出率必须在 1~20 Hz");
+      }
+      gasExpectNewRun = true;
+      gasSetStartCommandPending(true);
+      try {
+        gasAppendLog(`TX GAS,RATE,${rate}`);
+        await sendDeviceLine(`GAS,RATE,${rate}`);
+        await new Promise(resolve => setTimeout(resolve, 180));
+        gasAppendLog(`TX GAS,CAL,${zeroUv},${rfOhm}`);
+        await sendDeviceLine(`GAS,CAL,${zeroUv},${rfOhm}`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        gasAppendLog("TX GAS,START");
+        await sendDeviceLine("GAS,START");
+      } catch (error) {
+        gasSetStartCommandPending(false);
+        throw error;
+      }
+    }
+
+    async function gasStopAcquisition() {
+      gasAppendLog("TX GAS,STOP");
+      await sendDeviceLine("GAS,STOP");
+    }
+
+    function gasSaveConcentrationModel() {
+      const payload = {
+        slope: gasEls.ppmSlope.value,
+        offset: gasEls.ppmOffset.value,
+      };
+      localStorage.setItem(GAS_MODEL_KEY, JSON.stringify(payload));
+      gasUpdateMetrics();
+      gasScheduleDraw();
+      showToast("浓度换算模型已保存在当前浏览器");
+    }
+
+    function gasRestoreConcentrationModel() {
+      try {
+        const payload = JSON.parse(localStorage.getItem(GAS_MODEL_KEY) || "null");
+        if (!payload) return;
+        gasEls.ppmSlope.value = payload.slope ?? "";
+        gasEls.ppmOffset.value = payload.offset ?? "0";
+      } catch (err) {
+        gasAppendLog(`恢复浓度模型失败: ${err.message}`);
+      }
+    }
+
+    function gasLoadDemo() {
+      gasClearData();
+      const points = [];
+      for (let index = 0; index < 900; index++) {
+        const time = index / 10;
+        const breath = Math.max(0, Math.sin(time * Math.PI * 0.42));
+        const envelope = time < 28 ? 0.55 : (time < 65 ? 1 : 0.72);
+        const currentUa = 0.28 + envelope * 0.92 * Math.pow(breath, 1.7) +
+          0.018 * Math.sin(time * 5.1) + 0.009 * Math.sin(time * 13.7);
+        const currentNa = Math.round(currentUa * 1000);
+        const sensorUv = 2000000;
+        const vcmUv = 2500000;
+        const vforceUv = 500000;
+        const tiaUv = Math.round(vcmUv + currentUa * 12000);
+        const resistanceOhm = currentNa > 0 ? Math.round(sensorUv * 1000 / currentNa) : 0;
+        const adc = voltageUv => Math.max(0, Math.min(4095, Math.round(voltageUv / 3300000 * 4095)));
+        points.push({
+          seq: index,
+          deviceTimeMs: index * 100,
+          timeMs: index * 100,
+          currentNa,
+          currentUa,
+          resistanceOhm,
+          sensorUv,
+          tiaUv,
+          vcmUv,
+          vforceUv,
+          batteryMv: 3820 - Math.floor(index / 180),
+          vbusMv: 0,
+          flags: 0,
+          raw: [adc(tiaUv), adc(vcmUv), adc(vforceUv), adc(1910000), 0, 1500],
+          receivedAt: Date.now() + index,
+        });
+      }
+      gasPoints = points;
+      gasLatest = points[points.length - 1];
+      gasLastSequence = gasLatest.seq;
+      const baselineSample = points.slice(0, 30);
+      gasBaselineCurrentUa = baselineSample.reduce((sum, point) => sum + point.currentUa, 0) / baselineSample.length;
+      gasBaselineResistanceMohm = baselineSample.reduce((sum, point) => sum + point.resistanceOhm / 1e6, 0) / baselineSample.length;
+      gasMarkers = [
+        { timeMs: 2900, label: "BASELINE", color: "#4f6c72" },
+        { timeMs: 28000, label: "GAS ON", color: "#d88416" },
+        { timeMs: 65000, label: "RECOVERY", color: "#0e8e8c" },
+      ];
+      gasSetDeviceState("DEMO");
+      gasEls.lastFrame.textContent = `LAST FRAME #${gasLatest.seq} · ${(gasLatest.timeMs / 1000).toFixed(1)} s`;
+      gasAppendLog("已载入 90 s 演示数据；演示曲线不会发送到设备");
+      gasUpdateMetrics();
+      gasScheduleDraw();
+    }
+
+    function gasCsvCell(value) {
+      const text = value === null || value === undefined ? "" : String(value);
+      return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+    }
+
+    function gasExportCsv() {
+      if (gasPoints.length === 0) {
+        showToast("没有可导出的气体传感数据");
+        return;
+      }
+      const eventByTime = new Map();
+      for (const marker of gasMarkers) {
+        const current = eventByTime.get(marker.timeMs);
+        eventByTime.set(marker.timeMs, current ? `${current}|${marker.label}` : marker.label);
+      }
+      const header = [
+        "seq", "session_time_s", "device_time_ms", "current_uA", "current_nA",
+        "resistance_ohm", "resistance_Mohm", "response_percent", "concentration_ppm",
+        "sensor_bias_V", "tia_V", "vcm_V", "vforce_V", "battery_V", "vbus_V",
+        "flags_hex", "event", "raw_tia", "raw_vcm", "raw_vforce", "raw_bat", "raw_vbus", "raw_vref"
+      ];
+      const rows = [header.join(",")];
+      for (const point of gasPoints) {
+        const response = gasResponseFor(point);
+        const concentration = gasConcentrationFor(point);
+        const values = [
+          point.seq,
+          (point.timeMs / 1000).toFixed(3),
+          point.deviceTimeMs,
+          point.currentUa.toFixed(9),
+          point.currentNa,
+          point.resistanceOhm,
+          (point.resistanceOhm / 1e6).toFixed(9),
+          Number.isFinite(response) ? response.toFixed(9) : "",
+          Number.isFinite(concentration) ? concentration.toFixed(9) : "",
+          (point.sensorUv / 1e6).toFixed(9),
+          (point.tiaUv / 1e6).toFixed(9),
+          (point.vcmUv / 1e6).toFixed(9),
+          (point.vforceUv / 1e6).toFixed(9),
+          (point.batteryMv / 1000).toFixed(6),
+          (point.vbusMv / 1000).toFixed(6),
+          `0x${point.flags.toString(16).padStart(4, "0")}`,
+          eventByTime.get(point.timeMs) || "",
+          ...point.raw,
+        ];
+        rows.push(values.map(gasCsvCell).join(","));
+      }
+      const blob = new Blob(["\ufeff", rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      link.download = `gas_sensor_${stamp}.csv`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      gasAppendLog(`导出 ${gasPoints.length} 个原始数据点`);
+    }
+
+    function handleScanDone() {
+      setScanning(false);
+      finishItTimer();
+      setPaused(false);
+
+      if (!repeatState) return;
+
+      if (repeatState.remaining <= 0) {
+        if (repeatState.total > 1) {
+          if (points.length > 0) {
+            saveCurrentCurve(true);
+          }
+          appendLog(`重复扫描完成: ${repeatState.total}/${repeatState.total}`);
+        }
+        repeatState = null;
+        return;
+      }
+
+      if (points.length > 0) {
+        saveCurrentCurve(true);
+      }
+
+      const nextIndex = repeatState.total - repeatState.remaining + 1;
+      const waitMs = repeatState.intervalMs;
+      repeatState.remaining -= 1;
+      els.state.textContent = `等待第 ${nextIndex}/${repeatState.total} 次`;
+      els.startScan.disabled = true;
+      appendLog(`等待 ${waitMs / 1000}s 后开始第 ${nextIndex}/${repeatState.total} 次测试`);
+
+      repeatState.timer = setTimeout(() => {
+        points = [];
+        activeRunMode = repeatState.config.mode;
+        updateStats();
+        draw();
+        launchScan(repeatState.config, nextIndex).catch(err => {
+          appendLog(`重复扫描失败: ${err.message}`);
+          setScanning(false);
+          cancelRepeat();
+        });
+      }, waitMs);
+    }
+
+    function parseLine(line) {
+      const gasText = line.trim();
+      if (gasText.startsWith("GAS,")) {
+        parseGasLine(gasText);
+        return;
+      }
+      const q = line.trim().match(/^Q\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*,\s*(\d+)\s*,\s*(\d+)$/);
+      if (q) {
+        pendingQuality = {
+          rawX: Number(q[1]),
+          spanUv: Number(q[2]),
+          sampleMs: Number(q[3]),
+          unstable: Number(q[4]) !== 0,
+        };
+        return;
+      }
+
+      const m = line.trim().match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+      if (!m) {
+        const text = line.trim();
+        if (/^SCAN begin/.test(text)) {
+          activeRunMode = "transfer";
+          pendingQuality = null;
+          setScanning(true);
+        }
+        if (/^IT begin/.test(text)) {
+          activeRunMode = "it";
+          pendingQuality = null;
+          setPaused(false);
+          setScanning(true);
+          updateItTimerState("waiting");
+        }
+        if (text === "IT paused" || text === "TEST paused") setPaused(true);
+        if (text === "IT resumed" || text === "TEST resumed") setPaused(false);
+        if (text === "IT stop requested" || text === "TEST stop requested") {
+          setPaused(false);
+          updateItTimerState("stopped");
+        }
+        if (text === "Scan done" || text === "IT done") handleScanDone();
+        if (/^ERR /.test(text)) {
+          setScanning(false);
+          updateItTimerState("error");
+          cancelRepeat();
+        }
+        appendLog(line);
+        return;
+      }
+
+      const rawX = Number(m[1]);
+      const x = activeRunMode === "it" ? rawX / 1000 : rawX;
+      if (activeRunMode === "it") syncItTimer(rawX);
+      const adcUv = Number(m[2]);
+      const y = adcUvToIdsUa(adcUv);
+      const quality = pendingQuality;
+      const qualityMatches = quality && Math.abs(quality.rawX - rawX) <= (activeRunMode === "it" ? 5 : 0.001);
+      pendingQuality = null;
+      const last = points[points.length - 1];
+      if (last && x < last.x - CURVE_BREAK_MV) {
+        saveCurrentCurve(true);
+      }
+
+      points.push({
+        x,
+        y,
+        adcUv,
+        adcMv: adcUv / 1000,
+        spanUv: qualityMatches ? quality.spanUv : undefined,
+        sampleMs: qualityMatches ? quality.sampleMs : undefined,
+        unstable: qualityMatches ? quality.unstable : false,
+        mode: activeRunMode,
+        t: Date.now(),
+      });
+      updateStats();
+      draw();
+    }
+
+    function allDataPoints() {
+      const selectedCurve = selectedCurveForDisplay();
+      const visibleCurves = selectedCurve
+        ? [selectedCurve]
+        : savedCurves.filter(curve => (curve.mode || "transfer") === activeRunMode);
+      const currentPoints = selectedCurve
+        ? []
+        : points.filter(p => (p.mode || activeRunMode) === activeRunMode);
+
+      if (gmViewEnabled && activeRunMode === "transfer") {
+        return visibleCurves
+          .flatMap(curve => transconductancePoints(curve.points))
+          .concat(transconductancePoints(currentPoints));
+      }
+
+      return visibleCurves.flatMap(curve => curve.points).concat(currentPoints);
+    }
+
+    function selectedCurveForDisplay() {
+      const index = selectedCurveIndex();
+      if (index < 0) return null;
+      const curve = savedCurves[index];
+      return (curve.mode || "transfer") === activeRunMode ? curve : null;
+    }
+
+    function values() {
+      const all = allDataPoints();
+      const xs = all.map(p => p.x);
+      const ys = all.map(p => p.y);
+      return {
+        xs,
+        ys,
+        xmin: Math.min(...xs),
+        xmax: Math.max(...xs),
+        ymin: Math.min(...ys),
+        ymax: Math.max(...ys),
+      };
+    }
+
+    function axisValue(input, fallback) {
+      if (input.value.trim() === "") return fallback;
+      const n = Number(input.value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function idsDisplayUnit(yMin, yMax) {
+      const maxAbs = Math.max(Math.abs(yMin), Math.abs(yMax));
+      if (maxAbs >= 1000) {
+        return {
+          name: "mA",
+          scale: 1000,
+          digits: 3,
+        };
+      }
+
+      return {
+        name: "uA",
+        scale: 1,
+        digits: maxAbs < 10 ? 2 : 1,
+      };
+    }
+
+    function gmDisplayUnit(yMin, yMax) {
+      const maxAbs = Math.max(Math.abs(yMin), Math.abs(yMax));
+      if (maxAbs >= 1000) return { name: "S", scale: 1000, digits: 3 };
+      if (maxAbs < 1) return { name: "uS", scale: 0.001, digits: maxAbs < 0.01 ? 3 : 2 };
+      return { name: "mS", scale: 1, digits: maxAbs < 10 ? 3 : 2 };
+    }
+
+    function plotDisplayUnit(yMin, yMax) {
+      return gmViewEnabled && activeRunMode === "transfer"
+        ? gmDisplayUnit(yMin, yMax)
+        : idsDisplayUnit(yMin, yMax);
+    }
+
+    function formatPlotY(value, unit) {
+      return `${(value / unit.scale).toFixed(unit.digits)} ${unit.name}`;
+    }
+
+    function formatIds(valueUa, unit) {
+      return `${(valueUa / unit.scale).toFixed(unit.digits)} ${unit.name}`;
+    }
+
+    function formatSpanUv(spanUv) {
+      const abs = Math.abs(spanUv);
+      if (abs >= 1000) return `${(spanUv / 1000).toFixed(2)} mV`;
+      return `${spanUv.toFixed(0)} uV`;
+    }
+
+    function updateQualityStats(dataPoints = points) {
+      const qualityPoints = dataPoints.filter(p => Number.isFinite(p.spanUv));
+      if (qualityPoints.length === 0) {
+        els.qualitySummary.textContent = "质量 --";
+        return;
+      }
+
+      const unstableCount = qualityPoints.filter(p => p.unstable).length;
+      const maxSpanUv = Math.max(...qualityPoints.map(p => p.spanUv));
+      els.qualitySummary.textContent = `质量：不稳定 ${unstableCount}/${qualityPoints.length}，${formatSpanUv(maxSpanUv)}`;
+    }
+
+    function smoothWindowSize() {
+      const n = Number(els.smoothWindow.value);
+      if (!Number.isFinite(n) || n < 2) return 1;
+      const rounded = Math.round(n);
+      return rounded % 2 === 0 ? rounded + 1 : rounded;
+    }
+
+    function groupedDisplayPoints(sourcePoints) {
+      const sorted = [...sourcePoints].sort((a, b) => a.t - b.t);
+      const groups = [];
+      const mode = sourcePoints[0]?.mode || activeRunMode;
+
+      for (const p of sorted) {
+        const last = groups[groups.length - 1];
+        if (last && Math.abs(last.x - p.x) < 0.001) {
+          last.sum += p.y;
+          last.adcUvSum += Number.isFinite(p.adcUv) ? p.adcUv : 0;
+          last.adcUvCount += Number.isFinite(p.adcUv) ? 1 : 0;
+          last.spanUv = Number.isFinite(p.spanUv) ? Math.max(last.spanUv ?? p.spanUv, p.spanUv) : last.spanUv;
+          last.sampleMs = Number.isFinite(p.sampleMs) ? p.sampleMs : last.sampleMs;
+          last.unstable = last.unstable || !!p.unstable;
+          last.count += 1;
+          last.t = p.t;
+        } else {
+          groups.push({
+            x: p.x,
+            sum: p.y,
+            adcUvSum: Number.isFinite(p.adcUv) ? p.adcUv : 0,
+            adcUvCount: Number.isFinite(p.adcUv) ? 1 : 0,
+            spanUv: Number.isFinite(p.spanUv) ? p.spanUv : undefined,
+            sampleMs: Number.isFinite(p.sampleMs) ? p.sampleMs : undefined,
+            unstable: !!p.unstable,
+            count: 1,
+            t: p.t,
+            mode,
+          });
+        }
+      }
+
+      return groups.map(g => ({
+        x: g.x,
+        y: g.sum / g.count,
+        adcUv: g.adcUvCount > 0 ? g.adcUvSum / g.adcUvCount : undefined,
+        adcMv: g.adcUvCount > 0 ? (g.adcUvSum / g.adcUvCount) / 1000 : undefined,
+        spanUv: g.spanUv,
+        sampleMs: g.sampleMs,
+        unstable: g.unstable,
+        t: g.t,
+        mode: g.mode,
+      }));
+    }
+
+    function median3(a, b, c) {
+      return [a, b, c].sort((x, y) => x - y)[1];
+    }
+
+    function smoothItForDisplay(sorted) {
+      if (sorted.length < 3) return sorted;
+      const medianed = sorted.map((p, i) => {
+        if (i === 0 || i === sorted.length - 1) return { ...p };
+        return {
+          ...p,
+          y: median3(sorted[i - 1].y, p.y, sorted[i + 1].y),
+        };
+      });
+      const alpha = 0.28;
+      let lastY = medianed[0].y;
+      return medianed.map((p, i) => {
+        if (i === 0) return { ...p };
+        lastY = alpha * p.y + (1 - alpha) * lastY;
+        return {
+          ...p,
+          y: lastY,
+        };
+      });
+    }
+
+    function displayPoints(sourcePoints) {
+      const sorted = groupedDisplayPoints(sourcePoints);
+      const mode = sourcePoints[0]?.mode || activeRunMode;
+      if (mode === "it") {
+        return els.smoothEnable.checked ? smoothItForDisplay(sorted) : sorted;
+      }
+
+      const windowSize = els.smoothEnable.checked ? smoothWindowSize() : 1;
+      if (windowSize <= 1 || sorted.length < 3) return sorted;
+
+      const half = Math.floor(windowSize / 2);
+      return sorted.map((p, index) => {
+        const start = Math.max(0, index - half);
+        const end = Math.min(sorted.length - 1, index + half);
+        let sum = 0;
+        let count = 0;
+
+        for (let i = start; i <= end; i++) {
+          const q = sorted[i];
+          if (Math.abs(q.x - p.x) <= CURVE_BREAK_MV) {
+            sum += q.y;
+            count++;
+          }
+        }
+
+        return {
+          ...p,
+          y: count > 0 ? sum / count : p.y,
+        };
+      });
+    }
+
+    function drawSmoothPath(ctx, curvePoints, sx, sy) {
+      if (curvePoints.length === 0) return;
+
+      ctx.beginPath();
+      ctx.moveTo(sx(curvePoints[0].x), sy(curvePoints[0].y));
+
+      if (curvePoints.length === 1) {
+        ctx.stroke();
+        return;
+      }
+
+      for (let i = 1; i < curvePoints.length; i++) {
+        const prev = curvePoints[i - 1];
+        const p = curvePoints[i];
+
+        if (p.x < prev.x - CURVE_BREAK_MV) {
+          ctx.moveTo(sx(p.x), sy(p.y));
+          continue;
+        }
+
+        ctx.lineTo(sx(p.x), sy(p.y));
+      }
+
+      ctx.stroke();
+    }
+
+    function hoverCandidates() {
+      const candidates = [];
+      const selectedCurve = selectedCurveForDisplay();
+      const visibleCurves = selectedCurve
+        ? [selectedCurve]
+        : savedCurves.filter(curve => (curve.mode || "transfer") === activeRunMode);
+
+      for (const curve of visibleCurves) {
+        for (const p of curvePlotPoints(curve.points)) {
+          candidates.push({
+            ...p,
+            color: curve.color,
+            name: curve.name,
+          });
+        }
+      }
+
+      if (!selectedCurve) {
+        for (const p of curvePlotPoints(points)) {
+          candidates.push({
+            ...p,
+            color: "#17813b",
+            name: "Current",
+          });
+        }
+      }
+
+      return candidates;
+    }
+
+    function updateHoverFromEvent(event) {
+      if (!lastPlotState) return;
+
+      const rect = els.canvas.getBoundingClientRect();
+      const mx = event.clientX - rect.left;
+      const my = event.clientY - rect.top;
+      const { plot, sx, sy } = lastPlotState;
+
+      if (mx < plot.left || mx > plot.left + plot.width || my < plot.top || my > plot.top + plot.height) {
+        hoverPoint = null;
+        draw();
+        return;
+      }
+
+      let best = null;
+      for (const p of hoverCandidates()) {
+        const px = sx(p.x);
+        const py = sy(p.y);
+        const dx = px - mx;
+        const dy = py - my;
+        const d2 = dx * dx + dy * dy;
+        if (!best || d2 < best.d2) {
+          best = {
+            ...p,
+            px,
+            py,
+            d2,
+          };
+        }
+      }
+
+      hoverPoint = best && best.d2 <= 900 ? best : null;
+      draw();
+    }
+
+    function drawHover(ctx, w, h, yUnit) {
+      if (!hoverPoint) return;
+
+      const x = hoverPoint.px;
+      const y = hoverPoint.py;
+      const lines = [
+        hoverPoint.name,
+        activeRunMode === "it" ? `Time ${hoverPoint.x.toFixed(2)} s` : `Vgs ${hoverPoint.x.toFixed(1)} mV`,
+        gmViewEnabled && activeRunMode === "transfer"
+          ? `gm ${formatPlotY(hoverPoint.y, yUnit)}`
+          : `Ids ${formatIds(hoverPoint.y, yUnit)}`,
+      ];
+      if (!gmViewEnabled && Number.isFinite(hoverPoint.adcMv)) {
+        lines.push(`ADC ${hoverPoint.adcMv.toFixed(1)} mV`);
+      }
+      if (!gmViewEnabled && Number.isFinite(hoverPoint.spanUv)) {
+        lines.push(`Span ${formatSpanUv(hoverPoint.spanUv)}`);
+      }
+      if (hoverPoint.unstable) {
+        lines.push("Quality unstable");
+      }
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(37, 99, 235, 0.45)";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(x, 20);
+      ctx.lineTo(x, h - 56);
+      ctx.moveTo(58, y);
+      ctx.lineTo(w - 24, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = hoverPoint.color || "#17813b";
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      const axisFontPx = Math.max(10, Math.min(13, w / 95));
+      ctx.font = `${axisFontPx}px Consolas, monospace`;
+      const pad = 8;
+      const lineHeight = 17;
+      const boxW = Math.max(...lines.map(line => ctx.measureText(line).width)) + pad * 2;
+      const boxH = lines.length * lineHeight + pad * 2 - 4;
+      let boxX = x + 12;
+      let boxY = y - boxH - 10;
+      if (boxX + boxW > w - 8) boxX = x - boxW - 12;
+      if (boxY < 8) boxY = y + 12;
+
+      ctx.fillStyle = "rgba(17, 24, 39, 0.92)";
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.22)";
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+      ctx.fillStyle = "#ffffff";
+      lines.forEach((line, i) => {
+        ctx.fillText(line, boxX + pad, boxY + pad + 11 + i * lineHeight);
+      });
+      ctx.restore();
+    }
+
+    function calcV50(dataPoints = points) {
+      if (dataPoints.length < 2) return null;
+      const sorted = [...dataPoints].sort((a, b) => a.x - b.x);
+      const ys = sorted.map(p => p.y);
+      const ymin = Math.min(...ys);
+      const ymax = Math.max(...ys);
+      const target = ymin + (ymax - ymin) * 0.5;
+
+      for (let i = 1; i < sorted.length; i++) {
+        const a = sorted[i - 1];
+        const b = sorted[i];
+        const crosses = (a.y <= target && b.y >= target) || (a.y >= target && b.y <= target);
+        if (crosses && b.y !== a.y) {
+          const k = (target - a.y) / (b.y - a.y);
+          return a.x + k * (b.x - a.x);
+        }
+      }
+      return null;
+    }
+
+    function calcMaxSlope(dataPoints = points) {
+      if (dataPoints.length < 2) return null;
+      const sorted = [...dataPoints].sort((a, b) => a.x - b.x);
+      const grouped = [];
+      for (const p of sorted) {
+        const last = grouped[grouped.length - 1];
+        if (last && last.x === p.x) {
+          last.sum += p.y;
+          last.n += 1;
+          last.y = last.sum / last.n;
+        } else {
+          grouped.push({ x: p.x, y: p.y, sum: p.y, n: 1 });
+        }
+      }
+
+      let best = null;
+      for (let i = 1; i < grouped.length; i++) {
+        const dx = grouped[i].x - grouped[i - 1].x;
+        if (dx === 0) continue;
+        const slope = (grouped[i].y - grouped[i - 1].y) / dx;
+        if (!best || slope > best.slope) {
+          best = {
+            x: (grouped[i].x + grouped[i - 1].x) / 2,
+            slope,
+          };
+        }
+      }
+      return best;
+    }
+
+    function calcVgsAtIds(dataPoints = points, targetIdsUa = fixedCurrentTargetUa(), requireEnabled = true) {
+      if (requireEnabled && !els.fixedIdsEnable.checked) return null;
+      if (!Number.isFinite(targetIdsUa) || targetIdsUa <= 0 || dataPoints.length < 2) return null;
+      const grouped = [];
+      const sorted = [...dataPoints].sort((a, b) => a.x - b.x);
+
+      for (const p of sorted) {
+        const last = grouped[grouped.length - 1];
+        if (last && last.x === p.x) {
+          last.sum += p.y;
+          last.n += 1;
+          last.y = last.sum / last.n;
+        } else {
+          grouped.push({ x: p.x, y: p.y, sum: p.y, n: 1 });
+        }
+      }
+
+      for (let i = 1; i < grouped.length; i++) {
+        const a = grouped[i - 1];
+        const b = grouped[i];
+        const crosses = (a.y <= targetIdsUa && b.y >= targetIdsUa) ||
+          (a.y >= targetIdsUa && b.y <= targetIdsUa);
+        if (crosses && b.y !== a.y) {
+          const k = (targetIdsUa - a.y) / (b.y - a.y);
+          return a.x + k * (b.x - a.x);
+        }
+      }
+
+      return null;
+    }
+
+    function sampleStandardDeviation(values) {
+      if (values.length < 2) return 0;
+      const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+      const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (values.length - 1);
+      return Math.sqrt(variance);
+    }
+
+    function linearRegression(data) {
+      if (data.length < 2) return null;
+      const mx = data.reduce((s, p) => s + p.x, 0) / data.length;
+      const my = data.reduce((s, p) => s + p.y, 0) / data.length;
+      let sxx = 0;
+      let sxy = 0;
+      let syy = 0;
+      for (const p of data) {
+        sxx += (p.x - mx) ** 2;
+        sxy += (p.x - mx) * (p.y - my);
+        syy += (p.y - my) ** 2;
+      }
+      if (sxx === 0) return null;
+      const slope = sxy / sxx;
+      const intercept = my - slope * mx;
+      const r2 = syy > 0 ? Math.max(0, Math.min(1, (sxy * sxy) / (sxx * syy))) : 1;
+      return { slope, intercept, r2 };
+    }
+
+    function savitzkyGolay5(data) {
+      if (data.length < 5) return data.map(p => ({ ...p }));
+      const c = [-3, 12, 17, 12, -3];
+      return data.map((p, i) => {
+        if (i < 2 || i > data.length - 3) return { ...p };
+        const y = c.reduce((sum, weight, k) => sum + weight * data[i + k - 2].y, 0) / 35;
+        return { ...p, y };
+      });
+    }
+
+    function transconductancePoints(dataPoints) {
+      const grouped = groupedDisplayPoints(dataPoints)
+        .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+        .sort((a, b) => a.x - b.x);
+      const data = savitzkyGolay5(grouped);
+      if (data.length < 3) return [];
+
+      return data.map((point, index) => {
+        const start = Math.max(0, index - 2);
+        const end = Math.min(data.length, index + 3);
+        const fit = linearRegression(data.slice(start, end));
+        if (!fit || !Number.isFinite(fit.slope)) return null;
+        return {
+          ...point,
+          y: fit.slope,
+          mode: "gm",
+        };
+      }).filter(Boolean);
+    }
+
+    function curvePlotPoints(dataPoints) {
+      return gmViewEnabled && activeRunMode === "transfer"
+        ? transconductancePoints(dataPoints)
+        : displayPoints(dataPoints);
+    }
+
+    function toggleGmCurveView() {
+      if (activeRunMode !== "transfer" || analysisMode) {
+        showToast("跨导曲线仅适用于转移曲线");
+        return;
+      }
+
+      if (!gmViewEnabled) {
+        const selected = selectedCurveForDisplay();
+        const recent = [...savedCurves].reverse().find(curve => (curve.mode || "transfer") === "transfer");
+        const source = selected?.points || (points.length ? points : recent?.points || []);
+        if (transconductancePoints(source).length < 3) {
+          showToast("至少需要 3 个不同 Vgs 点才能计算跨导");
+          return;
+        }
+      }
+
+      setGmView(!gmViewEnabled);
+      draw();
+      showToast(gmViewEnabled ? "已切换为 gm–Vgs 跨导曲线" : "已返回 Ids–Vgs 转移曲线");
+    }
+
+    function transferAlgorithmMetrics(dataPoints) {
+      const grouped = groupedDisplayPoints(dataPoints).sort((a, b) => a.x - b.x);
+      const data = savitzkyGolay5(grouped);
+      if (data.length < 5) return null;
+      let bestIndex = -1;
+      let bestSlope = -Infinity;
+      for (let i = 1; i < data.length - 1; i++) {
+        const dx = data[i + 1].x - data[i - 1].x;
+        if (dx <= 0) continue;
+        const slope = (data[i + 1].y - data[i - 1].y) / dx;
+        if (slope > bestSlope) {
+          bestSlope = slope;
+          bestIndex = i;
+        }
+      }
+      if (bestIndex < 0 || !Number.isFinite(bestSlope) || bestSlope <= 0) return null;
+      const fit = linearRegression(data.slice(Math.max(0, bestIndex - 2), Math.min(data.length, bestIndex + 3)));
+      if (!fit || fit.slope <= 0) return null;
+      return { vth: -fit.intercept / fit.slope, gm: fit.slope, r2: fit.r2 };
+    }
+
+    function allanMetrics(dataPoints) {
+      const data = [...dataPoints].filter(p => Number.isFinite(p.x) && Number.isFinite(p.y)).sort((a, b) => a.x - b.x);
+      if (data.length < 8) return null;
+      const intervals = data.slice(1).map((p, i) => p.x - data[i].x).filter(v => v > 0).sort((a, b) => a - b);
+      const dt = intervals[Math.floor(intervals.length / 2)];
+      if (!Number.isFinite(dt) || dt <= 0) return null;
+      let best = null;
+      for (let m = 1; m <= Math.floor(data.length / 4); m *= 2) {
+        const avgs = [];
+        for (let i = 0; i + m <= data.length; i += m) {
+          avgs.push(data.slice(i, i + m).reduce((s, p) => s + p.y, 0) / m);
+        }
+        if (avgs.length < 2) continue;
+        const adev = Math.sqrt(0.5 * avgs.slice(1).reduce((s, v, i) => s + (v - avgs[i]) ** 2, 0) / (avgs.length - 1));
+        if (!best || adev < best.adev) best = { adev, tau: m * dt };
+      }
+      const fit = linearRegression(data);
+      return best ? { ...best, driftPerMin: (fit?.slope || 0) * 60 } : null;
+    }
+
+    function updateAdvancedStats(dataPoints, mode) {
+      if (!dataPoints || dataPoints.length < 5) {
+        els.algorithmBadge.textContent = "等待数据";
+        els.advancedValue1.textContent = "--";
+        els.advancedValue2.textContent = "--";
+        els.advancedValue3.textContent = "--";
+        return;
+      }
+      if (mode === "it") {
+        els.advancedLabel1.textContent = "Allan 最小偏差";
+        els.advancedLabel2.textContent = "建议平均时间";
+        els.advancedLabel3.textContent = "线性漂移";
+        const result = allanMetrics(dataPoints);
+        els.algorithmBadge.textContent = result ? "ALLAN + REG" : "数据不足";
+        els.advancedValue1.textContent = result ? `${result.adev.toFixed(3)} uA` : "--";
+        els.advancedValue2.textContent = result ? `${result.tau.toFixed(2)} s` : "--";
+        els.advancedValue3.textContent = result ? `${result.driftPerMin.toFixed(3)} uA/min` : "--";
+        return;
+      }
+      els.advancedLabel1.textContent = "线性外推 Vth";
+      els.advancedLabel2.textContent = "最大跨导 gm";
+      els.advancedLabel3.textContent = "拟合优度 R²";
+      const result = transferAlgorithmMetrics(dataPoints);
+      els.algorithmBadge.textContent = result ? "SG + LINEAR FIT" : "数据不足";
+      els.advancedValue1.textContent = result ? `${result.vth.toFixed(1)} mV` : "--";
+      els.advancedValue2.textContent = result ? `${result.gm.toFixed(4)} mS` : "--";
+      els.advancedValue3.textContent = result ? result.r2.toFixed(4) : "--";
+    }
+
+    function getReferenceCurve() {
+      return savedCurves.find(curve => curve.id === referenceCurveId) || null;
+    }
+
+    function updateReferenceStats() {
+      const reference = getReferenceCurve();
+      els.referenceCurve.textContent = reference ? reference.name : "未设置";
+
+      const targetMa = Number(els.fixedIds.value);
+      const targetText = Number.isFinite(targetMa) ? Number(targetMa.toFixed(3)).toString() : "";
+      els.deltaVgsLabel.textContent = targetText ? `ΔVgs@${targetText}mA` : "ΔVgs@Ids";
+
+      if (activeRunMode !== "transfer") {
+        els.deltaVgs.textContent = "仅转移曲线";
+        els.repeatability.textContent = "仅转移曲线";
+        return;
+      }
+
+      if (!reference) {
+        els.deltaVgs.textContent = "请设置参考";
+        els.repeatability.textContent = "--";
+        return;
+      }
+
+      if (!els.fixedIdsEnable.checked) {
+        els.deltaVgs.textContent = "请启用固定电流";
+        els.repeatability.textContent = "请启用固定电流";
+        return;
+      }
+
+      const targetIdsUa = fixedCurrentTargetUa();
+      const referenceVgs = calcVgsAtIds(reference.points, targetIdsUa, false);
+      if (referenceVgs === null) {
+        els.deltaVgs.textContent = "参考未经过目标电流";
+        els.repeatability.textContent = "--";
+        return;
+      }
+
+      const groupCurves = activeMeasurementGroupId
+        ? savedCurves.filter(curve => curve.groupId === activeMeasurementGroupId && (curve.mode || "transfer") === "transfer")
+        : [];
+      const groupValues = groupCurves
+        .map(curve => calcVgsAtIds(curve.points, targetIdsUa, false))
+        .filter(value => value !== null);
+
+      if (points.length > 1 && (points[0]?.mode || activeRunMode) === "transfer") {
+        const currentVgs = calcVgsAtIds(points, targetIdsUa, false);
+        if (currentVgs !== null) groupValues.push(currentVgs);
+      }
+
+      if (groupValues.length > 0) {
+        const mean = groupValues.reduce((sum, value) => sum + value, 0) / groupValues.length;
+        const sd = sampleStandardDeviation(groupValues);
+        const deltaMean = mean - referenceVgs;
+        els.deltaVgs.textContent = groupValues.length > 1
+          ? `${deltaMean >= 0 ? "+" : ""}${deltaMean.toFixed(1)} ± ${sd.toFixed(1)} mV`
+          : `${deltaMean >= 0 ? "+" : ""}${deltaMean.toFixed(1)} mV`;
+        els.repeatability.textContent = groupValues.length > 1
+          ? `${mean.toFixed(1)} ± ${sd.toFixed(1)} mV (n=${groupValues.length})`
+          : `等待重复数据 (n=1)`;
+        return;
+      }
+
+      els.deltaVgs.textContent = "当前曲线未经过目标电流";
+      els.repeatability.textContent = "--";
+    }
+
+    function fixedCurrentTargetUa() {
+      const valueMa = Number(els.fixedIds.value);
+      return Number.isFinite(valueMa) ? valueMa * 1000 : NaN;
+    }
+
+    function updateFixedIdsEnabledState() {
+      els.fixedIds.disabled = !els.fixedIdsEnable.checked;
+      if (!els.fixedIdsEnable.checked) {
+        els.fixedCurrentLabel.textContent = "Vgs@Ids";
+        els.fixedCurrentVgs.textContent = "未启用";
+      }
+    }
+
+    function updateStats() {
+      const mode = points[0]?.mode || activeRunMode;
+      const isIt = mode === "it";
+      const selected = selectedCurveForDisplay();
+      const recentSaved = [...savedCurves].reverse().find(curve => (curve.mode || curve.points[0]?.mode || "transfer") === mode);
+      updateAdvancedStats(selected ? selected.points : (points.length ? points : (recentSaved?.points || [])), mode);
+      els.referenceStat.hidden = isIt;
+      els.repeatabilityStat.hidden = isIt;
+      updateReferenceStats();
+      if (points.length === 0) {
+        els.fixedCurrentLabel.textContent = isIt ? "末值" : "Vgs@Ids";
+        els.fixedCurrentVgs.textContent = isIt ? "--" : (els.fixedIdsEnable.checked ? "--" : "未启用");
+        if (isIt) {
+          els.deltaVgsLabel.textContent = "变化量";
+          els.deltaVgs.textContent = "--";
+        }
+        updateQualityStats();
+        return;
+      }
+
+      const v = values();
+      const unit = idsDisplayUnit(v.ymin, v.ymax);
+      updateQualityStats(points);
+
+      if (mode === "it") {
+        const sorted = [...points].sort((a, b) => a.x - b.x);
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+        const delta = first && last ? last.y - first.y : 0;
+        els.fixedCurrentLabel.textContent = "末值";
+        els.fixedCurrentVgs.textContent = last ? formatIds(last.y, unit) : "--";
+        els.deltaVgsLabel.textContent = "变化量";
+        els.deltaVgs.textContent = sorted.length > 1 ? formatIds(delta, unit) : "--";
+        return;
+      }
+
+      const targetMa = Number(els.fixedIds.value);
+      const targetText = Number.isFinite(targetMa) ? Number(targetMa.toFixed(3)).toString() : "";
+      els.fixedCurrentLabel.textContent = els.fixedIdsEnable.checked && targetText ? `Vgs@${targetText}mA` : "Vgs@Ids";
+
+      const fixedVgs = calcVgsAtIds(points);
+      els.fixedCurrentVgs.textContent = els.fixedIdsEnable.checked ? (fixedVgs === null ? "--" : `${fixedVgs.toFixed(1)} mV`) : "未启用";
+    }
+
+    function drawGrid(ctx, w, h, plot, xMin, xMax, yMin, yMax, yUnit = plotDisplayUnit(yMin, yMax)) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#f9fcfc";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "#dbe7e9";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#789096";
+      ctx.font = `${Math.max(10, Math.min(13, w / 95))}px Consolas, monospace`;
+
+      const xTicks = 8;
+      const yTicks = 8;
+      for (let i = 0; i <= xTicks; i++) {
+        const x = plot.left + plot.width * i / xTicks;
+        ctx.beginPath();
+        ctx.moveTo(x, plot.top);
+        ctx.lineTo(x, plot.top + plot.height);
+        ctx.stroke();
+        const val = xMin + (xMax - xMin) * i / xTicks;
+        ctx.fillText(val.toFixed(0), x - 12, plot.top + plot.height + 22);
+      }
+      for (let i = 0; i <= yTicks; i++) {
+        const y = plot.top + plot.height * i / yTicks;
+        ctx.beginPath();
+        ctx.moveTo(plot.left, y);
+        ctx.lineTo(plot.left + plot.width, y);
+        ctx.stroke();
+        const val = yMax - (yMax - yMin) * i / yTicks;
+        ctx.fillText((val / yUnit.scale).toFixed(yUnit.digits), 8, y + 4);
+      }
+
+      ctx.strokeStyle = "#9eb3b8";
+      ctx.strokeRect(plot.left, plot.top, plot.width, plot.height);
+      ctx.fillStyle = "#526b72";
+      ctx.fillText(xAxisLabel(), plot.left + plot.width - 76, plot.top + plot.height + 42);
+      ctx.save();
+      ctx.translate(18, plot.top + 70);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(`${gmViewEnabled && activeRunMode === "transfer" ? "gm" : "Ids"} / ${yUnit.name}`, 0, 0);
+      ctx.restore();
+    }
+
+    function draw() {
+      const rect = els.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      els.canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      els.canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+
+      const ctx = els.canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const w = rect.width;
+      const h = rect.height;
+      const plot = {
+        left: 58,
+        top: 20,
+        width: Math.max(80, w - 82),
+        height: Math.max(80, h - 76),
+      };
+
+      const all = allDataPoints();
+      if (all.length === 0) {
+        lastPlotState = null;
+        hoverPoint = null;
+        drawGrid(ctx, w, h, plot, 0, 2000, 0, 2500);
+        ctx.fillStyle = "#9ca3af";
+        ctx.font = `${Math.max(14, Math.min(19, w / 52))}px Microsoft YaHei, Arial`;
+        ctx.fillText(gmViewEnabled ? "当前曲线的数据点不足，无法计算跨导" : "连接串口后开始绘制", plot.left + 24, plot.top + 36);
+        return;
+      }
+
+      const v = values();
+      let xMin = axisValue(els.xmin, v.xmin);
+      let xMax = axisValue(els.xmax, v.xmax);
+      let yMin = axisValue(els.ymin, v.ymin);
+      let yMax = axisValue(els.ymax, v.ymax);
+
+      if (xMax === xMin) xMax = xMin + 1;
+      if (yMax === yMin) yMax = yMin + 1;
+
+      const xPad = (xMax - xMin) * 0.04;
+      const yPad = (yMax - yMin) * 0.08;
+      if (!els.xmin.value) xMin -= xPad;
+      if (!els.xmax.value) xMax += xPad;
+      if (!els.ymin.value) yMin -= yPad;
+      if (!els.ymax.value) yMax += yPad;
+
+      const yUnit = plotDisplayUnit(yMin, yMax);
+      drawGrid(ctx, w, h, plot, xMin, xMax, yMin, yMax, yUnit);
+
+      const sx = x => plot.left + (x - xMin) / (xMax - xMin) * plot.width;
+      const sy = y => plot.top + plot.height - (y - yMin) / (yMax - yMin) * plot.height;
+      lastPlotState = { plot, sx, sy };
+
+      const selectedCurve = selectedCurveForDisplay();
+      const visibleCurves = selectedCurve
+        ? [selectedCurve]
+        : savedCurves.filter(curve => (curve.mode || "transfer") === activeRunMode);
+
+      for (const curve of visibleCurves) {
+        const curvePoints = curvePlotPoints(curve.points);
+        if (curvePoints.length === 0) continue;
+        const isReference = curve.id === referenceCurveId;
+        ctx.strokeStyle = curve.color;
+        ctx.lineWidth = isReference ? 2.8 : 1.5;
+        ctx.globalAlpha = isReference ? 1 : 0.75;
+        if (isReference) ctx.setLineDash([8, 4]);
+        drawSmoothPath(ctx, curvePoints, sx, sy);
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      }
+
+      if (!selectedCurve) {
+        const rawSorted = [...points].sort((a, b) => a.t - b.t);
+        const sorted = curvePlotPoints(points);
+        ctx.strokeStyle = "#17813b";
+        ctx.lineWidth = 2;
+        drawSmoothPath(ctx, sorted, sx, sy);
+
+        ctx.fillStyle = "#0f7a35";
+        ctx.globalAlpha = els.smoothEnable.checked ? 0.35 : 1;
+        const markerPoints = gmViewEnabled ? sorted : rawSorted;
+        for (const p of markerPoints) {
+          ctx.fillStyle = p.unstable ? "#dc2626" : "#0f7a35";
+          ctx.beginPath();
+          ctx.arc(sx(p.x), sy(p.y), 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+
+      const v50 = (gmViewEnabled || activeRunMode === "it" || selectedCurve) ? null : calcV50();
+      if (v50 !== null) {
+        ctx.strokeStyle = "#dc2626";
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(sx(v50), plot.top);
+        ctx.lineTo(sx(v50), plot.top + plot.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#dc2626";
+        ctx.fillText(`V50 ${v50.toFixed(1)}mV`, sx(v50) + 6, plot.top + 18);
+      }
+
+      const fixedVgs = (gmViewEnabled || activeRunMode === "it" || selectedCurve) ? null : calcVgsAtIds(points);
+      if (fixedVgs !== null) {
+        const targetMa = Number(els.fixedIds.value);
+        const targetText = Number.isFinite(targetMa) ? Number(targetMa.toFixed(3)).toString() : "";
+        ctx.strokeStyle = "#ffb454";
+        ctx.setLineDash([3, 5]);
+        ctx.beginPath();
+        ctx.moveTo(sx(fixedVgs), plot.top);
+        ctx.lineTo(sx(fixedVgs), plot.top + plot.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#2563eb";
+        ctx.fillText(`Ids ${targetText}mA ${fixedVgs.toFixed(1)}mV`, sx(fixedVgs) + 6, plot.top + 36);
+      }
+
+      drawHover(ctx, w, h, yUnit);
+    }
+
+    function dftSourcePoints() {
+      if (els.dftSource.value === "selected") {
+        const index = selectedCurveIndex();
+        if (index >= 0) return savedCurves[index].points;
+      }
+
+      if (points.length > 0) return points;
+
+      const selected = selectedCurveIndex();
+      if (selected >= 0) return savedCurves[selected].points;
+
+      const itCurve = [...savedCurves].reverse().find(curve => (curve.mode || curve.points[0]?.mode) === "it");
+      if (itCurve) return itCurve.points;
+      return savedCurves.length > 0 ? savedCurves[savedCurves.length - 1].points : [];
+    }
+
+    function meanOf(values) {
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
+
+    function stdOf(values, mean) {
+      if (values.length < 2) return 0;
+      const variance = values.reduce((sum, value) => sum + (value - mean) * (value - mean), 0) / (values.length - 1);
+      return Math.sqrt(variance);
+    }
+
+    function estimateSampleRate(data) {
+      const sorted = [...data].sort((a, b) => a.x - b.x);
+      const intervals = [];
+      for (let i = 1; i < sorted.length; i++) {
+        const dt = sorted[i].x - sorted[i - 1].x;
+        if (dt > 0) intervals.push(dt);
+      }
+      if (intervals.length === 0) return null;
+      intervals.sort((a, b) => a - b);
+      const medianDt = intervals[Math.floor(intervals.length / 2)];
+      return medianDt > 0 ? 1 / medianDt : null;
+    }
+
+    function computeWelchSpectrum(data, sampleRate) {
+      const ys = data.slice(-4096).map(p => p.y);
+      let segmentLength = 1;
+      while (segmentLength * 2 <= Math.min(256, ys.length)) segmentLength *= 2;
+      if (segmentLength < 8) return [];
+      const step = Math.max(1, segmentLength / 2);
+      const bins = segmentLength / 2;
+      const power = new Array(bins + 1).fill(0);
+      let segments = 0;
+      for (let start = 0; start + segmentLength <= ys.length; start += step) {
+        const segment = ys.slice(start, start + segmentLength);
+        const mean = meanOf(segment);
+        const window = segment.map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (segmentLength - 1)));
+        const windowPower = window.reduce((s, v) => s + v * v, 0);
+        for (let k = 0; k <= bins; k++) {
+          let re = 0;
+          let im = 0;
+          for (let i = 0; i < segmentLength; i++) {
+            const angle = -2 * Math.PI * k * i / segmentLength;
+            const value = (segment[i] - mean) * window[i];
+            re += value * Math.cos(angle);
+            im += value * Math.sin(angle);
+          }
+          const oneSided = k > 0 && k < bins ? 2 : 1;
+          power[k] += oneSided * (re * re + im * im) / (sampleRate * windowPower);
+        }
+        segments++;
+      }
+      return power.slice(1).map((sum, index) => ({
+        freq: (index + 1) * sampleRate / segmentLength,
+        amp: Math.sqrt(sum / Math.max(1, segments)),
+      }));
+    }
+
+    function drawDftSpectrum(spectrum) {
+      const canvas = els.dftCanvas;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const w = rect.width;
+      const h = rect.height;
+      const plot = { left: 58, top: 24, width: Math.max(80, w - 88), height: Math.max(80, h - 80) };
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = "#f9fcfc";
+      ctx.fillRect(0, 0, w, h);
+
+      const maxFreq = spectrum.length ? spectrum[spectrum.length - 1].freq : 1;
+      const maxAmp = Math.max(1e-9, ...spectrum.map(p => p.amp));
+      const sx = f => plot.left + f / maxFreq * plot.width;
+      const sy = a => plot.top + plot.height - a / maxAmp * plot.height;
+
+      ctx.strokeStyle = "#dbe7e9";
+      ctx.fillStyle = "#789096";
+      ctx.font = `${Math.max(10, Math.min(13, w / 95))}px Consolas, monospace`;
+      for (let i = 0; i <= 8; i++) {
+        const x = plot.left + plot.width * i / 8;
+        ctx.beginPath();
+        ctx.moveTo(x, plot.top);
+        ctx.lineTo(x, plot.top + plot.height);
+        ctx.stroke();
+        ctx.fillText((maxFreq * i / 8).toFixed(2), x - 12, plot.top + plot.height + 22);
+      }
+      for (let i = 0; i <= 6; i++) {
+        const y = plot.top + plot.height * i / 6;
+        ctx.beginPath();
+        ctx.moveTo(plot.left, y);
+        ctx.lineTo(plot.left + plot.width, y);
+        ctx.stroke();
+        ctx.fillText((maxAmp * (1 - i / 6)).toFixed(2), 8, y + 4);
+      }
+
+      ctx.strokeStyle = "#9eb3b8";
+      ctx.strokeRect(plot.left, plot.top, plot.width, plot.height);
+      ctx.fillStyle = "#526b72";
+      ctx.fillText("Frequency / Hz", plot.left + plot.width - 105, plot.top + plot.height + 44);
+      ctx.save();
+      ctx.translate(18, plot.top + 90);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText("ASD / uA/sqrt(Hz)", 0, 0);
+      ctx.restore();
+
+      ctx.strokeStyle = "#4dd9d2";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      spectrum.forEach((p, i) => {
+        const x = sx(p.freq);
+        const y = sy(p.amp);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    function updateDftAnalysis() {
+      const data = dftSourcePoints()
+        .filter(p => Number.isFinite(p.x) && Number.isFinite(p.y))
+        .sort((a, b) => a.x - b.x);
+
+      if (data.length < 8) {
+        els.dftSampleRate.textContent = "--";
+        els.dftMean.textContent = "--";
+        els.dftStd.textContent = "--";
+        els.dftPeak.textContent = "--";
+        els.dftDrift.textContent = "--";
+        els.dftMainFreq.textContent = "--";
+        els.dftNote.textContent = "数据点太少，至少需要 8 个 IT 点才能做 Welch PSD 分析。";
+        drawDftSpectrum([]);
+        return;
+      }
+
+      const ys = data.map(p => p.y);
+      const mean = meanOf(ys);
+      const std = stdOf(ys, mean);
+      const min = Math.min(...ys);
+      const max = Math.max(...ys);
+      const drift = ys[ys.length - 1] - ys[0];
+      const sampleRate = estimateSampleRate(data);
+      const unit = idsDisplayUnit(min, max);
+
+      els.dftMean.textContent = formatIds(mean, unit);
+      els.dftStd.textContent = formatIds(std, unit);
+      els.dftPeak.textContent = formatIds(max - min, unit);
+      els.dftDrift.textContent = formatIds(drift, unit);
+
+      if (!sampleRate) {
+        els.dftSampleRate.textContent = "--";
+        els.dftMainFreq.textContent = "--";
+        els.dftNote.textContent = "无法估算采样率，请确认横轴是均匀递增的时间。";
+        drawDftSpectrum([]);
+        return;
+      }
+
+      const spectrum = computeWelchSpectrum(data, sampleRate);
+      const main = spectrum.reduce((best, p) => (!best || p.amp > best.amp ? p : best), null);
+      els.dftSampleRate.textContent = `${sampleRate.toFixed(2)} Hz`;
+      els.dftMainFreq.textContent = main ? `${main.freq.toFixed(3)} Hz / ${main.amp.toFixed(3)} uA/√Hz` : "--";
+      drawDftSpectrum(spectrum);
+
+      const nyquist = sampleRate / 2;
+      const lowBand = spectrum.filter(p => p.freq > 0 && p.freq <= Math.min(1, nyquist));
+      const lowEnergy = lowBand.reduce((sum, p) => sum + p.amp * p.amp, 0);
+      const totalEnergy = spectrum.reduce((sum, p) => sum + p.amp * p.amp, 0);
+      const lowRatio = totalEnergy > 0 ? lowEnergy / totalEnergy : 0;
+      const note = [
+        `点数: ${data.length}`,
+        `频率范围: 0~${nyquist.toFixed(2)} Hz`,
+        `低频能量占比(<=1Hz): ${(lowRatio * 100).toFixed(1)}%`,
+        nyquist < 50 ? "当前采样率无法观察 50Hz/100Hz 市电干扰；如果要看市电，IT 间隔建议 5ms 或更短。" : "当前采样率可以观察 50Hz 范围。",
+        Math.abs(drift) > std * 3 ? "判断: 漂移量明显大于随机抖动，优先怀疑电化学界面慢漂或溶液扰动。" : "判断: 漂移没有明显压过随机抖动，可以重点看频谱主峰。",
+      ];
+      els.dftNote.textContent = note.join("\n");
+    }
+
+    function ingestIncomingText(chunk) {
+      if (!chunk) return;
+      rxBuffer += chunk;
+      const lines = rxBuffer.split(/\r?\n/);
+      rxBuffer = lines.pop() || "";
+      for (const line of lines) parseLine(line);
+    }
+
+    function handleBluetoothNotification(event) {
+      const value = event.target.value;
+      const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+      bleNotificationCount += 1;
+      bleNotificationBytes += bytes.byteLength;
+      ingestIncomingText(bleTextDecoder.decode(bytes, { stream: true }));
+    }
+
+    function handleBluetoothDisconnected() {
+      if (activeTransport !== "bluetooth") return;
+      const wasRunning = gasRunning;
+      const connectedSeconds = bleConnectedAtMs > 0
+        ? ((performance.now() - bleConnectedAtMs) / 1000).toFixed(1)
+        : "?";
+      const connectedDurationMs = bleConnectedAtMs > 0
+        ? performance.now() - bleConnectedAtMs
+        : 0;
+      const lastFrameAge = gasLatest?.receivedAt
+        ? `${((Date.now() - gasLatest.receivedAt) / 1000).toFixed(1)} s`
+        : "无数据帧";
+      bleServer = null;
+      bleWriteCharacteristic = null;
+      bleNotifyCharacteristic = null;
+      activeTransport = null;
+      gasResetHandshake();
+      gasSetStartCommandPending(false);
+      setState("蓝牙已断开", false);
+      gasAppendLog(`BLE 链路意外断开 · 存续 ${connectedSeconds} s · Notify ${bleNotificationCount} 包/${bleNotificationBytes} B · 最后数据 ${lastFrameAge}`);
+      gasAppendLog(`链路断开不代表PCB已经停止采集${wasRunning ? "；此前设备正在采集" : ""}；重连后先读取状态`);
+      if (!bleManualDisconnect) {
+        bleUnstableDisconnects = connectedDurationMs > 0 && connectedDurationMs < 30000
+          ? bleUnstableDisconnects + 1
+          : 0;
+        if (bleUnstableDisconnects >= 4) {
+          gasAppendLog("30秒内已连续断开4次，停止自动重连以避免电源反复重启");
+          showToast("连续短时断链，请先检查PCB供电");
+          return;
+        }
+        showToast("蓝牙连接已断开；正在低频自动重连");
+        scheduleBluetoothReconnect();
+      }
+    }
+
+    function bluetoothErrorMessage(error) {
+      if (error?.name === "NotFoundError") return "未选择蓝牙设备";
+      if (error?.name === "SecurityError") return "浏览器安全策略阻止蓝牙；请使用Chrome/Edge并通过HTTPS或localhost打开";
+      if (error?.name === "NetworkError") return "未找到FFE0透传服务，或模块刚刚断开";
+      return error?.message || String(error);
+    }
+
+    function clearBluetoothReconnectTimer() {
+      if (bleReconnectTimer) clearTimeout(bleReconnectTimer);
+      bleReconnectTimer = null;
+    }
+
+    function scheduleBluetoothReconnect() {
+      if (bleManualDisconnect || !bleDevice || bleReconnectTimer || bleReconnectInProgress) return;
+      if (bleReconnectAttempt >= gasRecoveryPolicy.RECONNECT_DELAYS_MS.length) {
+        gasAppendLog("自动重连已暂停 · 连续4次失败，请检查PCB供电后手动重连");
+        showToast("自动重连失败，请检查供电");
+        return;
+      }
+      const attemptNumber = bleReconnectAttempt + 1;
+      const delayMs = gasRecoveryPolicy.reconnectDelay(bleReconnectAttempt);
+      bleReconnectAttempt += 1;
+      gasEls.portText.textContent = `等待自动重连 ${attemptNumber}/4 · ${(delayMs / 1000).toFixed(1)} s`;
+      gasAppendLog(`计划自动重连 ${attemptNumber}/4 · ${delayMs} ms后`);
+      bleReconnectTimer = setTimeout(async () => {
+        bleReconnectTimer = null;
+        if (bleManualDisconnect || isDeviceConnected()) return;
+        bleReconnectInProgress = true;
+        gasUpdateConnectionUi(false);
+        try {
+          await connectBluetooth(true);
+        } catch (error) {
+          gasAppendLog(`自动重连 ${attemptNumber}/4 失败：${bluetoothErrorMessage(error)}`);
+        } finally {
+          bleReconnectInProgress = false;
+          gasUpdateConnectionUi(isDeviceConnected());
+        }
+        if (!isBluetoothConnected()) scheduleBluetoothReconnect();
+      }, delayMs);
+      gasUpdateConnectionUi(false);
+    }
+
+    async function connectBluetooth(isReconnect = false) {
+      if (!("bluetooth" in navigator)) {
+        throw new Error("当前浏览器不支持Web Bluetooth；请使用Windows版Chrome或Edge");
+      }
+      if (!isReconnect && bleReconnectInProgress) {
+        throw new Error("自动重连正在进行，请稍候");
+      }
+      if (isDeviceConnected()) throw new Error("请先断开当前设备");
+      if (isReconnect && !bleDevice) throw new Error("没有可重连的蓝牙设备");
+
+      try {
+        clearBluetoothReconnectTimer();
+        bleManualDisconnect = false;
+        if (!bleDevice) {
+          bleDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: [BLE_SERVICE_UUID],
+          });
+        }
+        bleDevice.removeEventListener("gattserverdisconnected", handleBluetoothDisconnected);
+        bleDevice.addEventListener("gattserverdisconnected", handleBluetoothDisconnected);
+        bleServer = await bleDevice.gatt.connect();
+        const service = await bleServer.getPrimaryService(BLE_SERVICE_UUID);
+        bleWriteCharacteristic = await service.getCharacteristic(BLE_WRITE_UUID);
+        bleNotifyCharacteristic = await service.getCharacteristic(BLE_NOTIFY_UUID);
+        await bleNotifyCharacteristic.startNotifications();
+        bleNotifyCharacteristic.removeEventListener("characteristicvaluechanged", handleBluetoothNotification);
+        bleNotifyCharacteristic.addEventListener("characteristicvaluechanged", handleBluetoothNotification);
+        rxBuffer = "";
+        bleConnectedAtMs = performance.now();
+        bleNotificationCount = 0;
+        bleNotificationBytes = 0;
+        activeTransport = "bluetooth";
+        gasResetHandshake();
+        setState("BLE 已连接", true);
+        bleReconnectAttempt = 0;
+        if (!isReconnect) bleUnstableDisconnects = 0;
+        gasAppendLog(`BLE ${isReconnect ? "RECONNECT" : "CONNECT"} ${bleDevice.name || "未命名设备"} · FFE0/FFE1/FFE2`);
+        gasAppendLog("BLE TX模式 Write Command（FFE1规定的无响应写入）");
+        await new Promise(resolve => setTimeout(resolve, isReconnect ? 650 : 300));
+        const handshakeOk = await gasPerformHandshake(isReconnect ? "重连" : "连接");
+        if (!handshakeOk) setState("BLE已连接/STM32未响应", true);
+      } catch (error) {
+        bleServer = null;
+        bleWriteCharacteristic = null;
+        bleNotifyCharacteristic = null;
+        activeTransport = null;
+        gasResetHandshake();
+        setState("蓝牙连接失败", false);
+        throw new Error(bluetoothErrorMessage(error));
+      }
+    }
+
+    async function sendBluetoothLine(text) {
+      if (!isBluetoothConnected()) throw new Error("蓝牙未连接");
+      const bytes = new TextEncoder().encode(text + "\r\n");
+      for (let offset = 0; offset < bytes.length; offset += BLE_WRITE_CHUNK_BYTES) {
+        const chunk = bytes.slice(offset, offset + BLE_WRITE_CHUNK_BYTES);
+        // FFE1 is the module's Write Without Response transparent-UART input.
+        // Some VG7439 firmware revisions also advertise Write Request, but
+        // explicit acknowledged writes fail at the GATT layer.
+        if (bleWriteCharacteristic.properties.writeWithoutResponse &&
+                   typeof bleWriteCharacteristic.writeValueWithoutResponse === "function") {
+          await bleWriteCharacteristic.writeValueWithoutResponse(chunk);
+        } else if (typeof bleWriteCharacteristic.writeValue === "function") {
+          await bleWriteCharacteristic.writeValue(chunk);
+        } else {
+          throw new Error("FFE1不支持可用的GATT写入方式");
+        }
+        if (offset + BLE_WRITE_CHUNK_BYTES < bytes.length) {
+          await new Promise(resolve => setTimeout(resolve, 12));
+        }
+      }
+    }
+
+    async function sendDeviceLine(text) {
+      if (activeTransport === "bluetooth") return sendBluetoothLine(text);
+      if (activeTransport === "serial") return sendSerialLine(text);
+      throw new Error("设备未连接");
+    }
+
+    async function connectSerial() {
+      if (!("serial" in navigator)) {
+        throw new Error("当前浏览器不支持Web Serial；请使用新版Chrome或Edge");
+      }
+      if (isDeviceConnected()) throw new Error("请先断开当前设备");
+
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: Number(els.baud.value), dataBits: 8, stopBits: 1, parity: "none", flowControl: "none" });
+      keepReading = true;
+      rxBuffer = "";
+      activeTransport = "serial";
+      gasResetHandshake();
+      setState("已连接", true);
+
+      const decoder = new TextDecoderStream();
+      port.readable.pipeTo(decoder.writable).catch(() => {});
+      reader = decoder.readable.getReader();
+      if (activeWorkspace === "gas") {
+        gasAppendLog("TX GAS,HELLO");
+        await sendDeviceLine("GAS,HELLO");
+      }
+
+      try {
+        while (keepReading) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          ingestIncomingText(value);
+        }
+      } catch (err) {
+        if (keepReading) appendLog(`串口读取错误: ${err.message}`);
+      } finally {
+        if (activeTransport === "serial") activeTransport = null;
+        setState("未连接", false);
+        if (isScanning && activeRunMode === "it") updateItTimerState("disconnected");
+      }
+    }
+
+    async function sendSerialLine(text) {
+      if (!isSerialConnected()) throw new Error("串口未连接");
+
+      const writer = port.writable.getWriter();
+      try {
+        await writer.write(new TextEncoder().encode(text + "\r\n"));
+      } finally {
+        writer.releaseLock();
+      }
+    }
+
+    function numberFromInput(input, name) {
+      const value = Number(input.value);
+      if (!Number.isFinite(value)) {
+        throw new Error(`${name} 不是有效数字`);
+      }
+      return Math.round(value);
+    }
+
+    function decimalFromInput(input, name) {
+      const value = Number(input.value);
+      if (!Number.isFinite(value)) {
+        throw new Error(`${name} 不是有效数字`);
+      }
+      return value;
+    }
+
+    async function launchScan(config, index = 1) {
+      const cmd = config.mode === "it"
+        ? `IT ${config.vgs},${config.duration},${config.interval},${config.settle},${config.vdsUv}`
+        : `SCAN ${config.start},${config.end},${config.rate},${config.offset},${config.vdsUv}`;
+      if (config.mode === "it") prepareItTimer(config.duration);
+      if (repeatState && repeatState.total > 1) {
+        appendLog(`第 ${index}/${repeatState.total} 次扫描`);
+      }
+      appendLog(`TX ${cmd}`);
+      viewedHistoryCurveIndex = null;
+      els.curveSelect.value = "-1";
+      hoverPoint = null;
+      setScanning(true);
+      try {
+        await sendSerialLine(cmd);
+      } catch (err) {
+        setScanning(false);
+        if (config.mode === "it") updateItTimerState("error");
+        throw err;
+      }
+    }
+
+    async function togglePause() {
+      if (!isScanning) return;
+      const cmd = isPaused ? "RESUME" : "PAUSE";
+      appendLog(`TX ${cmd}`);
+      await sendSerialLine(cmd);
+    }
+
+    async function stopTest() {
+      if (!isScanning) return;
+      cancelRepeat();
+      appendLog("TX STOP");
+      await sendSerialLine("STOP");
+      updateItTimerState("stopped");
+    }
+
+    async function startScan() {
+      const config = testMode === "it"
+        ? {
+            mode: "it",
+            vgs: numberFromInput(els.itVgs, "Vgs"),
+            duration: numberFromInput(els.itDuration, "采集时间"),
+            interval: numberFromInput(els.itInterval, "采样间隔"),
+            settle: numberFromInput(els.itSettle, "稳定时间"),
+          }
+        : {
+            mode: "transfer",
+            start: numberFromInput(els.scanStart, "起始电压"),
+            end: numberFromInput(els.scanEnd, "结束电压"),
+            rate: numberFromInput(els.scanRate, "扫描速率"),
+            offset: numberFromInput(els.scanOffset, "Vgs偏移"),
+          };
+      const repeatCount = numberFromInput(els.repeatCount, "重复次数");
+      const repeatInterval = numberFromInput(els.repeatInterval, "重复间隔");
+      config.vdsMv = decimalFromInput(els.vdsMv, "Vds");
+      config.vdsUv = Math.round(config.vdsMv * 1000);
+
+      if (config.mode === "transfer" && config.rate <= 0) {
+        throw new Error("扫描速率必须大于 0");
+      }
+      if (config.mode === "transfer") {
+        const actualMin = Math.min(config.start + config.offset, config.end + config.offset);
+        const actualMax = Math.max(config.start + config.offset, config.end + config.offset);
+        if (actualMin < 0 || actualMax > 2500) {
+          throw new Error(`实际 DAC 输出范围 ${actualMin}~${actualMax} mV 超出 0~2500 mV`);
+        }
+      }
+      if (config.mode === "it" && (config.duration <= 0 || config.interval <= 0 || config.settle < 0)) {
+        throw new Error("IT 参数不合法");
+      }
+      if (config.vdsMv < 0 || config.vdsMv > 2500) {
+        throw new Error("Vds 必须在 0~2500 mV 范围内");
+      }
+      if (repeatCount <= 0) {
+        throw new Error("重复次数必须大于 0");
+      }
+      if (repeatInterval < 0) {
+        throw new Error("重复间隔不能小于 0");
+      }
+
+      cancelRepeat();
+      setPaused(false);
+
+      if (points.length > 0) {
+        saveCurrentCurve(true);
+      }
+
+      points = [];
+      pendingQuality = null;
+      updateStats();
+      draw();
+
+      repeatState = {
+        config,
+        total: repeatCount,
+        remaining: repeatCount - 1,
+        intervalMs: repeatInterval * 1000,
+        timer: null,
+      };
+
+      activeMeasurementGroupId = allocateMeasurementGroupId();
+      activeRunMode = config.mode;
+      await launchScan(config, 1);
+    }
+
+    async function disconnectSerial() {
+      cancelRepeat();
+      if (gasRunning && isSerialConnected()) {
+        await sendSerialLine("GAS,STOP").catch(() => {});
+      }
+      keepReading = false;
+      if (reader) {
+        await reader.cancel().catch(() => {});
+        reader.releaseLock();
+        reader = null;
+      }
+      if (port) {
+        await port.close().catch(() => {});
+        port = null;
+      }
+      if (activeTransport === "serial") activeTransport = null;
+      gasResetHandshake();
+      gasSetStartCommandPending(false);
+      isScanning = false;
+      pendingQuality = null;
+      setPaused(false);
+      updateItTimerState("disconnected");
+      setState("未连接", false);
+    }
+
+    async function disconnectBluetooth(forgetDevice = true) {
+      cancelRepeat();
+      bleManualDisconnect = true;
+      clearBluetoothReconnectTimer();
+      bleReconnectAttempt = 0;
+      bleUnstableDisconnects = 0;
+      gasResetHandshake();
+      gasSetStartCommandPending(false);
+      if (gasRunning && isBluetoothConnected()) {
+        await sendBluetoothLine("GAS,STOP").catch(error => {
+          gasAppendLog(`安全停止未确认：${error.message}`);
+        });
+        await new Promise(resolve => setTimeout(resolve, 120));
+      }
+      if (bleNotifyCharacteristic) {
+        bleNotifyCharacteristic.removeEventListener("characteristicvaluechanged", handleBluetoothNotification);
+        await bleNotifyCharacteristic.stopNotifications().catch(() => {});
+      }
+      if (bleDevice) {
+        bleDevice.removeEventListener("gattserverdisconnected", handleBluetoothDisconnected);
+        if (bleDevice.gatt?.connected) bleDevice.gatt.disconnect();
+      }
+      bleServer = null;
+      bleWriteCharacteristic = null;
+      bleNotifyCharacteristic = null;
+      if (activeTransport === "bluetooth") activeTransport = null;
+      if (forgetDevice) bleDevice = null;
+      rxBuffer = "";
+      setState("未连接", false);
+      gasAppendLog("BLE DISCONNECT · 已尝试先发送 GAS,STOP");
+    }
+
+    async function disconnectDevice() {
+      if (activeTransport === "bluetooth") return disconnectBluetooth(true);
+      if (activeTransport === "serial") return disconnectSerial();
+      setState("未连接", false);
+    }
+
+    function renderCurveList() {
+      els.curveSelect.innerHTML = "";
+      const allOption = document.createElement("option");
+      allOption.value = "-1";
+      allOption.textContent = `全部曲线 (${savedCurves.length})`;
+      els.curveSelect.appendChild(allOption);
+
+      savedCurves.forEach((curve, index) => {
+        if (!curve.id) curve.id = allocateCurveId();
+        const option = document.createElement("option");
+        option.value = String(index);
+        const referenceMark = curve.id === referenceCurveId ? "[参考] " : "";
+        option.textContent = `${referenceMark}${curve.name} (${curve.points.length})`;
+        option.style.color = curve.color;
+        els.curveSelect.appendChild(option);
+      });
+    }
+
+    function renumberSavedCurves() {
+      const counters = { transfer: 1, it: 1 };
+      for (const curve of savedCurves) {
+        const mode = curve.mode || curve.points[0]?.mode || "transfer";
+        const prefix = mode === "it" ? "IT" : "Transfer";
+        const n = counters[mode] || 1;
+        curve.name = `${prefix} Line ${n}`;
+        counters[mode] = n + 1;
+      }
+    }
+
+    function saveCurrentCurve(silent = false) {
+      if (points.length === 0) {
+        if (!silent) appendLog("当前没有可保存的数据");
+        return;
+      }
+      const color = curveColors[savedCurves.length % curveColors.length];
+      const mode = points[0]?.mode || activeRunMode;
+      savedCurves.push({
+        id: allocateCurveId(),
+        name: "",
+        mode,
+        color,
+        groupId: activeMeasurementGroupId,
+        points: points.map(p => ({ ...p })),
+      });
+      renumberSavedCurves();
+      points = [];
+      pendingQuality = null;
+      renderCurveList();
+      els.curveSelect.value = String(savedCurves.length - 1);
+      updateStats();
+      draw();
+      if (!silent) appendLog(`保存 ${savedCurves[savedCurves.length - 1].name}: ${savedCurves[savedCurves.length - 1].points.length} points`);
+    }
+
+    function selectedCurveIndex() {
+      const n = Number(els.curveSelect.value);
+      return Number.isInteger(n) && n >= 0 && n < savedCurves.length ? n : -1;
+    }
+
+    function restoreSelectedCurve() {
+      const index = selectedCurveIndex();
+      if (index < 0) return;
+
+      if (isScanning) {
+        const curve = savedCurves[index];
+        const mode = curve.mode || curve.points[0]?.mode || "transfer";
+        if (mode === activeRunMode) {
+          viewedHistoryCurveIndex = index;
+          updateStats();
+          draw();
+          appendLog(`测试中查看 ${curve.name}，当前采集数据不会被保存或替换`);
+        } else {
+          appendLog("测试中不能载入不同类型的历史曲线，请测试结束后再切换查看");
+        }
+        return;
+      }
+
+      points = savedCurves[index].points.map((p, i) => ({ ...p, t: Date.now() + i }));
+      activeMeasurementGroupId = null;
+      activeRunMode = savedCurves[index].mode || points[0]?.mode || testMode;
+      testMode = activeRunMode;
+      if (activeRunMode !== "transfer" && gmViewEnabled) setGmView(false);
+      else updateGmViewUi();
+      els.modeTransfer.classList.toggle("active", testMode === "transfer");
+      els.modeIT.classList.toggle("active", testMode === "it");
+      els.transferParams.style.display = testMode === "transfer" ? "inline-flex" : "none";
+      els.itParams.style.display = testMode === "it" ? "inline-flex" : "none";
+      if (testMode === "it") {
+        const elapsedMs = points.reduce((max, point) => Math.max(max, Number(point.x) || 0), 0) * 1000;
+        itTimer.durationMs = Math.max(elapsedMs, (Number(els.itDuration.value) || 0) * 1000);
+        itTimer.elapsedMs = elapsedMs;
+        itTimer.state = elapsedMs >= itTimer.durationMs ? "done" : "stopped";
+      }
+      renderItTimer();
+      updateStats();
+      draw();
+      appendLog(`载入 ${savedCurves[index].name}`);
+    }
+
+    function setSelectedReferenceCurve() {
+      const index = selectedCurveIndex();
+      if (index < 0) {
+        appendLog("请先在历史曲线中选择一条转移曲线");
+        return;
+      }
+
+      const curve = savedCurves[index];
+      const mode = curve.mode || curve.points[0]?.mode || "transfer";
+      if (mode !== "transfer") {
+        appendLog("IT 曲线不能设为转移曲线参考");
+        return;
+      }
+
+      if (!curve.id) curve.id = allocateCurveId();
+      referenceCurveId = curve.id;
+      renderCurveList();
+      els.curveSelect.value = String(index);
+      updateStats();
+      draw();
+      appendLog(`已将 ${curve.name} 设为参考曲线`);
+    }
+
+    function deleteSelectedCurve() {
+      const index = selectedCurveIndex();
+      if (index < 0) return;
+      const removed = savedCurves.splice(index, 1)[0];
+      if (removed.id === referenceCurveId) {
+        referenceCurveId = null;
+      }
+      renumberSavedCurves();
+      renderCurveList();
+      updateStats();
+      draw();
+      appendLog(`删除 ${removed.name}`);
+    }
+
+    function exportCsv() {
+      const curves = savedCurves.map(curve => ({
+        name: curve.name,
+        points: curve.points,
+      }));
+      if (points.length > 0) {
+        curves.push({
+          name: "Current",
+          points,
+        });
+      }
+
+      if (curves.length === 0) {
+        appendLog("没有可导出的曲线");
+        return;
+      }
+
+      const csvCell = value => {
+        const text = String(value ?? "");
+        return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+      };
+
+      const header = curves.flatMap(curve => [
+        `${curve.name}_${(curve.mode || curve.points[0]?.mode) === "it" ? "Time_s" : "VGS_mV"}`,
+        `${curve.name}_IDS_uA`,
+      ]).map(csvCell).join(",");
+
+      const maxRows = Math.max(...curves.map(curve => curve.points.length));
+      const rows = [];
+      for (let i = 0; i < maxRows; i++) {
+        const row = [];
+        for (const curve of curves) {
+          const p = curve.points[i];
+          row.push(p ? p.x : "");
+          row.push(p ? p.y : "");
+        }
+        rows.push(row.map(csvCell).join(","));
+      }
+
+      const body = [header, ...rows].join("\n");
+      const blob = new Blob(["\ufeff" + body + "\n"], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `portable_EGFET_${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function parseCsv(text) {
+      text = text.replace(/^\ufeff/, "");
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (quoted) {
+          if (ch === '"' && next === '"') {
+            cell += '"';
+            i++;
+          } else if (ch === '"') {
+            quoted = false;
+          } else {
+            cell += ch;
+          }
+        } else {
+          if (ch === '"') {
+            quoted = true;
+          } else if (ch === ",") {
+            row.push(cell);
+            cell = "";
+          } else if (ch === "\n") {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = "";
+          } else if (ch !== "\r") {
+            cell += ch;
+          }
+        }
+      }
+
+      if (cell.length > 0 || row.length > 0) {
+        row.push(cell);
+        rows.push(row);
+      }
+      return rows.filter(r => r.some(c => String(c).trim() !== ""));
+    }
+
+    function addImportedCurve(name, importedPoints) {
+      if (importedPoints.length === 0) return false;
+      const color = curveColors[savedCurves.length % curveColors.length];
+      const mode = importedPoints[0]?.mode || "transfer";
+      savedCurves.push({
+        id: allocateCurveId(),
+        name,
+        mode,
+        color,
+        points: importedPoints.map((p, i) => ({
+          x: p.x,
+          y: p.y,
+          adcUv: p.adcUv,
+          adcMv: p.adcMv,
+          mode,
+          t: Date.now() + i,
+        })),
+      });
+      return true;
+    }
+
+    function importWideCsv(rows, fileName) {
+      const header = rows[0].map(c => String(c).trim());
+      let count = 0;
+      for (let col = 0; col < header.length - 1;) {
+        const h0 = header[col] || "";
+        const h1 = header[col + 1] || "";
+        const h2 = header[col + 2] || "";
+        const hasVb = /VB|VGS/i.test(h0);
+        const hasTime = /Time/i.test(h0);
+        const hasIds = /IDS|ID|current|uA/i.test(h1);
+        const hasAdcPair = /ADC/i.test(h1);
+        const hasAdcThird = /ADC/i.test(h2);
+
+        if ((!hasVb && !hasTime) || (!hasIds && !hasAdcPair)) {
+          col++;
+          continue;
+        }
+
+        const name = h0.replace(/_?(VB|VGS)_?mV$/i, "").replace(/_?Time_?s$/i, "").replace(/_?(VB|VGS)$/i, "") || `${fileName}_${count + 1}`;
+        const importedPoints = [];
+        for (let r = 1; r < rows.length; r++) {
+          const x = Number(rows[r][col]);
+          const mainY = Number(rows[r][col + 1]);
+          const adcMv = hasAdcThird ? Number(rows[r][col + 2]) : (hasAdcPair ? mainY : NaN);
+          const y = hasIds ? mainY : adcMvToIdsUa(mainY);
+          if (Number.isFinite(x) && Number.isFinite(y)) {
+            importedPoints.push({
+              x,
+              y,
+              adcMv: Number.isFinite(adcMv) ? adcMv : undefined,
+              mode: hasTime ? "it" : "transfer",
+            });
+          }
+        }
+        if (addImportedCurve(name, importedPoints)) count++;
+        col += hasAdcThird ? 3 : 2;
+      }
+      return count;
+    }
+
+    function importLongCsv(rows, fileName) {
+      const header = rows[0].map(c => String(c).trim().toLowerCase());
+      const curveCol = header.indexOf("curve");
+      const xCol = header.findIndex(h => h.includes("time") || h.includes("vb") || h.includes("vgs"));
+      const yCol = header.findIndex(h => h.includes("ids") || h === "id" || h.includes("adc"));
+      if (curveCol < 0 || xCol < 0 || yCol < 0) return 0;
+      const yIsAdc = header[yCol].includes("adc");
+      const mode = header[xCol].includes("time") ? "it" : "transfer";
+
+      const groups = new Map();
+      for (let r = 1; r < rows.length; r++) {
+        const name = rows[r][curveCol] || fileName;
+        const x = Number(rows[r][xCol]);
+        const rawY = Number(rows[r][yCol]);
+        const y = yIsAdc ? adcMvToIdsUa(rawY) : rawY;
+        if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+        if (!groups.has(name)) groups.set(name, []);
+        groups.get(name).push({
+          x,
+          y,
+          adcMv: yIsAdc ? rawY : undefined,
+          mode,
+        });
+      }
+
+      let count = 0;
+      for (const [name, importedPoints] of groups.entries()) {
+        if (addImportedCurve(name, importedPoints)) count++;
+      }
+      return count;
+    }
+
+    async function importCsvFile(file) {
+      if (isScanning) {
+        appendLog("测试进行中不能导入 CSV，请测试结束后再导入");
+        return;
+      }
+
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length < 2) {
+        appendLog("CSV 没有有效数据");
+        return;
+      }
+
+      const fileName = file.name.replace(/\.[^.]+$/, "");
+      savedCurves = [];
+      points = [];
+      viewedHistoryCurveIndex = null;
+      referenceCurveId = null;
+      activeMeasurementGroupId = null;
+      let count = importWideCsv(rows, fileName);
+      if (count === 0) count = importLongCsv(rows, fileName);
+
+      if (count === 0) {
+        appendLog("未识别 CSV 格式");
+        return;
+      }
+
+      renderCurveList();
+      updateStats();
+      draw();
+      if (analysisMode) updateDftAnalysis();
+      appendLog(`导入 ${count} 条曲线: ${file.name}`);
+    }
+
+    els.connect.addEventListener("click", () => connectSerial().catch(err => appendLog(`连接失败: ${err.message}`)));
+    els.disconnect.addEventListener("click", () => disconnectDevice().catch(err => appendLog(`断开失败: ${err.message}`)));
+    gasEls.switchToGas.addEventListener("click", () => setWorkspace("gas"));
+    gasEls.switchToEgFet.addEventListener("click", () => setWorkspace("egfet"));
+    gasEls.connect.addEventListener("click", () => {
+      if (selectedGasTransport() === "bluetooth") {
+        connectBluetooth().catch(err => gasAppendLog(`蓝牙连接失败: ${err.message}`));
+      } else {
+        els.baud.value = gasEls.baud.value;
+        connectSerial().catch(err => gasAppendLog(`串口连接失败: ${err.message}`));
+      }
+    });
+    gasEls.disconnect.addEventListener("click", () => disconnectDevice().catch(err => gasAppendLog(`断开失败: ${err.message}`)));
+    gasEls.transport.addEventListener("change", updateGasTransportChoiceUi);
+    gasEls.start.addEventListener("click", () => gasStartAcquisition().catch(err => gasAppendLog(`开始失败: ${err.message}`)));
+    gasEls.stop.addEventListener("click", () => gasStopAcquisition().catch(err => gasAppendLog(`停止失败: ${err.message}`)));
+    gasEls.status.addEventListener("click", () => sendDeviceLine("GAS,STATUS").catch(err => gasAppendLog(`状态读取失败: ${err.message}`)));
+    gasEls.applyCal.addEventListener("click", () => gasApplyCalibration().catch(err => gasAppendLog(`校准写入失败: ${err.message}`)));
+    gasEls.metric.addEventListener("change", gasScheduleDraw);
+    gasEls.smooth.addEventListener("change", gasScheduleDraw);
+    gasEls.baseline.addEventListener("click", gasCaptureBaseline);
+    gasEls.expose.addEventListener("click", () => gasMarkEvent("GAS ON", "#d88416"));
+    gasEls.recover.addEventListener("click", () => gasMarkEvent("RECOVERY", "#0e8e8c"));
+    gasEls.clear.addEventListener("click", gasClearData);
+    gasEls.demo.addEventListener("click", gasLoadDemo);
+    gasEls.export.addEventListener("click", gasExportCsv);
+    gasEls.saveModel.addEventListener("click", gasSaveConcentrationModel);
+    gasEls.ppmSlope.addEventListener("input", gasUpdateMetrics);
+    gasEls.ppmOffset.addEventListener("input", gasUpdateMetrics);
+    els.modeTransfer.addEventListener("click", () => setMode("transfer"));
+    els.modeIT.addEventListener("click", () => setMode("it"));
+    els.modeDFT.addEventListener("click", () => setMode("dft"));
+    els.runDft.addEventListener("click", updateDftAnalysis);
+    els.dftSource.addEventListener("change", updateDftAnalysis);
+    els.startScan.addEventListener("click", () => startScan().catch(err => appendLog(`开始失败: ${err.message}`)));
+    els.pauseTest.addEventListener("click", () => togglePause().catch(err => appendLog(`暂停失败: ${err.message}`)));
+    els.stopTest.addEventListener("click", () => stopTest().catch(err => appendLog(`停止失败: ${err.message}`)));
+    els.clear.addEventListener("click", () => {
+      cancelRepeat();
+      points = [];
+      rxBuffer = "";
+      pendingQuality = null;
+      itTimer = {
+        durationMs: Math.max(0, Number(els.itDuration.value) || 0) * 1000,
+        elapsedMs: 0,
+        state: "idle",
+      };
+      renderItTimer();
+      els.log.textContent = "";
+      updateStats();
+      draw();
+    });
+    els.demoData.addEventListener("click", loadDemoData);
+    els.saveSession.addEventListener("click", saveSession);
+    els.saveCurve.addEventListener("click", saveCurrentCurve);
+    els.toggleGmCurve.addEventListener("click", toggleGmCurveView);
+    els.curveSelect.addEventListener("change", () => {
+      hoverPoint = null;
+      draw();
+    });
+    els.restoreCurve.addEventListener("click", restoreSelectedCurve);
+    els.setReferenceCurve.addEventListener("click", setSelectedReferenceCurve);
+    els.deleteCurve.addEventListener("click", deleteSelectedCurve);
+    els.import.addEventListener("click", () => els.importFile.click());
+    els.importFile.addEventListener("change", () => {
+      const file = els.importFile.files[0];
+      if (file) importCsvFile(file).catch(err => appendLog(`导入失败: ${err.message}`));
+      els.importFile.value = "";
+    });
+    els.export.addEventListener("click", exportCsv);
+    els.redraw.addEventListener("click", draw);
+    els.fixedIds.addEventListener("input", () => {
+      updateStats();
+      draw();
+    });
+    els.fixedIdsEnable.addEventListener("change", () => {
+      updateFixedIdsEnabledState();
+      updateStats();
+      draw();
+    });
+    els.smoothEnable.addEventListener("change", draw);
+    els.smoothWindow.addEventListener("input", draw);
+    els.itDuration.addEventListener("input", () => {
+      if (testMode !== "it" || isScanning || itTimer.state !== "idle") return;
+      itTimer.durationMs = Math.max(0, Number(els.itDuration.value) || 0) * 1000;
+      renderItTimer();
+    });
+    els.canvas.addEventListener("mousemove", updateHoverFromEvent);
+    els.canvas.addEventListener("mouseleave", () => {
+      hoverPoint = null;
+      draw();
+    });
+    els.fit.addEventListener("click", () => {
+      els.xmin.value = "";
+      els.xmax.value = "";
+      els.ymin.value = "";
+      els.ymax.value = "";
+      draw();
+    });
+    window.addEventListener("resize", () => {
+      draw();
+      gasScheduleDraw();
+    });
+
+    setState("未连接", false);
+    updateGasTransportChoiceUi();
+    gasRestoreConcentrationModel();
+    gasSetDeviceState("OFF");
+    gasUpdateMetrics();
+    initParameterHelp();
+    renderCurveList();
+    updateFixedIdsEnabledState();
+    updateGmViewUi();
+    renderItTimer();
+    updateStats();
+    draw();
+    restoreSession();
+  </script>
+</body>
+</html>
